@@ -1,0 +1,11 @@
+WICHISBEST v5.3.0 Alpha — UI Refinements
+
+Changes:
+- New hero: "נטרל רעשי רקע. קבל החלטה מושכלת."
+- Hero CTA changed to "עזור לי להחליט".
+- Removed A/B/C demo rows from the opening card.
+- Replaced them with one compact decision message.
+- Reduced the opening card height.
+- Added a direct document/image upload link below the central question.
+- Increased answer text size and contrast, especially on iPhone.
+- Preserved ChatGPT, Gemini, Claude, criteria, weights, diagnostics and Netlify functions.

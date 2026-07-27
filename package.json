@@ -1,0 +1,9 @@
+{
+  "name": "wichisbest-dynamic-foundation",
+  "version": "4.0.3",
+  "private": true,
+  "description": "WICHISBEST multi-model decision platform foundation",
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#07152b">
+  <meta name="description" content="WICHISBEST עוזרת להשוות עד שלוש אפשרויות, לשמור העדפות ולקבל תמונת החלטה ברורה.">
+  <meta name="wichisbest-version" content="3.0.0">
+  <title>WICHISBEST 3.0 — משווים. מבינים. מחליטים.</title>
+  <link rel="stylesheet" href="style.css?v=5.3.0-ui-refinements">
+
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<script>
+(function(){
+  const build='5.3.0-ui-refinements';
+  try{
+    const previous=localStorage.getItem('wichisbest-build');
+    if(previous!==build){
+      localStorage.setItem('wichisbest-build',build);
+      if('caches' in window){caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).catch(()=>{});}
+      if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister()))).catch(()=>{});}
+    }
+  }catch(e){}
+})();
+</script>
+
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="#top" aria-label="WICHISBEST דף הבית"><span class="brand-mark">W</span><span>WICHISBEST</span></a>
+      <nav aria-label="ניווט ראשי">
+        <a href="#compare">השוואה חדשה</a>
+        <a href="#memory">הזיכרון שלי</a>
+        <a href="#history">היסטוריה</a>
+      </nav>
+      <a class="top-cta" href="#compare">התחל עכשיו</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="shell hero-grid">
+        <div class="hero-copy">
+          <div class="version-pill"><span></span> גרסה 5.3 Alpha — ממשק נקי וקריא</div>
+          <h1>נטרל רעשי רקע.<br><em>קבל החלטה מושכלת.</em></h1>
+          <p>כתוב את השאלה, העלה מסמך או תמונה והגדר מה חשוב לך. WICHISBEST מרכזת את המידע, משווה בין החלופות ומציגה ניתוח ברור ושקוף.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#compare">עזור לי להחליט <span>←</span></a>
+            <a class="button quiet" href="#memory">איך הזיכרון עובד?</a>
+          </div>
+          <div class="hero-proof">
+            <span>✓ שלוש חלופות</span><span>✓ מידע שמור בשליטתך</span><span>✓ התחלה חדשה נקייה</span>
+          </div>
+        </div>
+
+        <div class="product-card" aria-label="הדגמת ממשק WICHISBEST">
+          <div class="product-card-head"><div><small>תיק החלטה</small><strong>בחירת השקעה</strong></div><span class="live-dot">מוכן לניתוח</span></div>
+          <div class="source-row"><span class="source-icon">טקסט</span><div><strong>תיאור רקע</strong><small>ניסיון, יעד ורמת סיכון</small></div><b>✓</b></div>
+          <div class="source-row"><span class="source-icon">PDF</span><div><strong>דוח מצורף</strong><small>investment-report.pdf</small></div><b>✓</b></div>
+          <div class="source-row"><span class="source-icon">קול</span><div><strong>הכתבה קולית</strong><small>נוספה לתיאור הרקע</small></div><b>✓</b></div>
+          <div class="decision-message"><b>91</b><strong>נטרל רעשי רקע.<br>קבל החלטה מושכלת.</strong></div>
+          <p>המחשה של תהליך קבלת החלטה המבוסס על מספר מודלי AI.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="compare" class="workspace-section">
+      <div class="shell workspace">
+        <aside class="workspace-guide">
+          <span class="kicker">NEW COMPARISON</span>
+          <h2>ספר לנו מה צריך להחליט</h2>
+          <p>אפשר להתחיל משאלה קצרה, ולהוסיף רק את החומר שבאמת עוזר להבנת המקרה.</p>
+          <ol>
+            <li><b>1</b><span><strong>השאלה</strong><small>מה בדיוק אתה רוצה להכריע?</small></span></li>
+            <li><b>2</b><span><strong>החלופות</strong><small>עד שלוש אפשרויות להשוואה</small></span></li>
+            <li><b>3</b><span><strong>המידע הנוסף</strong><small>רקע, מסמך, תמונה, קישור או קול</small></span></li>
+          </ol>
+        </aside>
+
+        <form id="decision-form" class="decision-card" novalidate>
+          <div class="card-title"><div><small>שלב 1 מתוך 3</small><h3>פרטי ההחלטה</h3></div><span id="local-indicator">נשמר מקומית בלבד</span></div>
+
+          <div class="field">
+            <label for="category">קטגוריה</label>
+            <select id="category" required><option value="">בחר קטגוריה</option><option>שוק ההון</option><option>נדל״ן והשקעות</option><option>אחר</option></select>
+          </div>
+
+          <div class="field">
+            <label for="question">השאלה המרכזית</label>
+            <textarea id="question" rows="4" maxlength="1000" required placeholder="לדוגמה: האם עדיף להיכנס להשקעה עכשיו, להמתין או לפעול בהדרגה?"></textarea>
+            <div class="question-tools">
+              <button type="button" id="upload-inline-button" class="inline-upload-link">📎 צרף מסמך או תמונה</button>
+              <span>PDF, Word, Excel, PowerPoint או תמונה</span>
+            </div>
+            <div class="counter"><span>משפט אחד ברור מספיק להתחלה</span><span id="question-count">0/1000</span></div>
+          </div>
+
+          <div class="options-grid">
+            <div class="field"><label for="option-a">אפשרות א׳</label><input id="option-a" maxlength="140" placeholder="לדוגמה: לפעול עכשיו"></div>
+            <div class="field"><label for="option-b">אפשרות ב׳</label><input id="option-b" maxlength="140" placeholder="לדוגמה: להמתין"></div>
+            <div class="field"><label for="option-c">אפשרות ג׳</label><input id="option-c" maxlength="140" placeholder="לדוגמה: לפעול בהדרגה"></div>
+          </div>
+
+          <div class="field">
+            <label for="considerations">שיקולים חשובים</label>
+            <textarea id="considerations" rows="3" maxlength="800" placeholder="תקציב, סיכון, זמן, נזילות, משפחה, מיקום או כל מגבלה אחרת"></textarea>
+          </div>
+
+
+          <section class="criteria-panel" aria-labelledby="criteria-title">
+            <div class="criteria-heading">
+              <div>
+                <span class="kicker">DECISION CRITERIA</span>
+                <h3 id="criteria-title">מה חשוב לך בהחלטה?</h3>
+                <p>הוסף קריטריונים וקבע את מידת החשיבות שלהם. המשקלים אינם חייבים להסתכם ב־100.</p>
+              </div>
+              <button type="button" id="add-criterion" class="button secondary compact">＋ הוסף קריטריון</button>
+            </div>
+            <div id="criteria-list" class="criteria-list">
+              <div class="criterion-row">
+                <input class="criterion-name" type="text" maxlength="80" placeholder="למשל: סיכון">
+                <label class="criterion-weight"><span>חשיבות</span><input type="range" min="1" max="10" value="8"><output>8</output></label>
+                <button type="button" class="criterion-remove" aria-label="מחיקת קריטריון">×</button>
+              </div>
+              <div class="criterion-row">
+                <input class="criterion-name" type="text" maxlength="80" placeholder="למשל: תשואה או תועלת">
+                <label class="criterion-weight"><span>חשיבות</span><input type="range" min="1" max="10" value="8"><output>8</output></label>
+                <button type="button" class="criterion-remove" aria-label="מחיקת קריטריון">×</button>
+              </div>
+              <div class="criterion-row">
+                <input class="criterion-name" type="text" maxlength="80" placeholder="למשל: זמן">
+                <label class="criterion-weight"><span>חשיבות</span><input type="range" min="1" max="10" value="5"><output>5</output></label>
+                <button type="button" class="criterion-remove" aria-label="מחיקת קריטריון">×</button>
+              </div>
+            </div>
+            <div class="criteria-hint">המודלים יתבקשו לנמק כיצד כל חלופה מתאימה לקריטריונים שהגדרת.</div>
+          </section>
+
+          <section class="context-panel" id="context-panel">
+            <button class="context-toggle" id="context-toggle" type="button" aria-expanded="false"><span><b>＋</b><span><strong>הוספת מידע נוסף</strong><small>רקע, מסמכים, תמונה, קישור או הכתבה</small></span></span><em>אופציונלי</em></button>
+            <div class="context-body" id="context-body" hidden>
+              <div class="field">
+                <div class="label-row"><label for="background">תיאור הרקע</label><button id="voice-button" class="microphone" type="button">🎤 הכתבה</button></div>
+                <textarea id="background" rows="6" maxlength="2500" placeholder="ספר על הניסיון שלך, המטרה, המצב הנוכחי והפרטים שחשוב להביא בחשבון..."></textarea>
+                <div class="counter"><span id="voice-status">אפשר לכתוב או להכתיב בקול</span><span id="background-count">0/2500</span></div>
+              </div>
+
+              <div class="upload-zone" id="upload-zone">
+                <input id="attachments" type="file" multiple accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,image/*" hidden>
+                <button type="button" id="upload-button"><span>⇧</span><strong>צרף מסמך או תמונה</strong><small>PDF, Word, Excel, PowerPoint או תמונה</small></button>
+                <div id="file-list" class="file-list"></div>
+              </div>
+
+              <div class="field"><label for="source-link">קישור למקור מידע</label><input id="source-link" type="url" placeholder="https://example.com"></div>
+
+              <div class="memory-choice">
+                <label><input id="save-profile" type="checkbox"><span><strong>לשמור את הרקע והשיקולים לפעם הבאה</strong><small>נשמרים בדפדפן זה בלבד. ניתן לצפות, לערוך ולמחוק בכל עת.</small></span></label>
+                <div><button id="load-profile" type="button" hidden>טעינת מידע שמור</button><button id="delete-profile" class="danger" type="button" hidden>מחיקת מידע שמור</button></div>
+              </div>
+            </div>
+          </section>
+
+          <div id="form-message" class="form-message" role="status"></div>
+          <button class="button primary submit-button" type="submit">הצגת הדירוג <span>←</span></button>
+        </form>
+      </div>
+    </section>
+
+    <section id="results" class="results-section" hidden>
+      <div class="shell results-card">
+        <div class="results-head"><div><span class="kicker">WICHISBEST RANKING</span><h2>הדירוג שלך מוכן</h2><p id="result-question"></p></div><span id="analysis-badge" class="simulation-badge">מכין ניתוח</span></div>
+        <p id="consensus-summary" class="consensus-summary"></p>
+        <div id="provider-strip" class="provider-strip" aria-label="סטטוס המודלים"></div>
+        <div id="ranking-list" class="ranking-list"></div>
+        <div class="results-note"><strong>מה חשוב לדעת?</strong><p>הדירוג מבוסס על מודלי ה־AI שהוגדרו וחוברו ב־Netlify. בשלב זה תוכן הקבצים המצורפים עדיין אינו נקרא; נשמרים רק פרטי הקובץ לצורך הרחבה עתידית.</p></div>
+        <div class="results-actions"><button id="new-comparison" class="button secondary" type="button">התחלה חדשה ונקייה</button><button id="back-to-form" class="button quiet" type="button">עריכת הנתונים</button></div>
+      </div>
+    </section>
+
+    <section id="memory" class="dashboard-section">
+      <div class="shell dashboard-grid">
+        <article class="dashboard-card featured"><span class="kicker">PERSONAL MEMORY</span><h2>הזיכרון שלך נשאר בשליטתך</h2><p>האתר יכול לזכור רקע ושיקולים שבחרת לשמור, ולהציע אותם בהחלטה הבאה. התחלה חדשה מנקה את הטופס — אך אינה מוחקת את הפרופיל השמור.</p><div class="memory-status" id="memory-status"><span></span><strong>לא נשמר עדיין מידע אישי</strong></div></article>
+        <article class="dashboard-card" id="history"><div class="dashboard-title"><div><span class="kicker">HISTORY</span><h3>החלטות אחרונות</h3></div><button id="clear-history" type="button">ניקוי היסטוריה</button></div><div id="history-list" class="history-list"><p class="empty-state">עדיין אין החלטות שמורות.</p></div></article>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="shell footer-inner"><div class="brand"><span class="brand-mark">W</span><span>WICHISBEST</span></div><p>גרסה 5.2 Alpha · קריטריונים ומשקלים</p></div></footer>
+  <script src="app.js?v=5.3.0-ui-refinements"></script>
+</body>
+</html>

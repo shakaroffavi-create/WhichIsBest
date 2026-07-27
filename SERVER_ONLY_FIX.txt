@@ -1,0 +1,5 @@
+This build intentionally keeps the working v4.0.4 frontend unchanged.
+Only netlify/functions/analyze.js and netlify/functions/health.js were taken from the live-AI connector build.
+
+After deploying to the existing Netlify project, configure API keys in Netlify environment variables.
+Do not put API keys in index.html, app.js, config.js, or any public file.

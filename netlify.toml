@@ -1,0 +1,78 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "microphone=(self), camera=()"
+
+[[headers]]
+  for = "/config.js"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0"
+
+[[redirects]]
+  from = "/api/analyze"
+  to = "/.netlify/functions/analyze"
+  status = 200
+
+[[redirects]]
+  from = "/api/health"
+  to = "/.netlify/functions/health"
+  status = 200
+
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store"
+
+
+# WICHISBEST v5.0 Alpha — independent AI provider routes
+[[redirects]]
+  from = "/api/openai"
+  to = "/.netlify/functions/openai"
+  status = 200
+
+[[redirects]]
+  from = "/api/gemini"
+  to = "/.netlify/functions/gemini"
+  status = 200
+
+[[redirects]]
+  from = "/api/claude"
+  to = "/.netlify/functions/claude"
+  status = 200
+
+
+[[redirects]]
+  from = "/api/claude-debug"
+  to = "/.netlify/functions/claude-debug"
+  status = 200
