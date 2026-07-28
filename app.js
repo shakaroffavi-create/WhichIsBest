@@ -367,9 +367,9 @@ async function requestSingleProvider(provider, payload) {
     claude: '/api/claude'
   };
   const timeoutByProvider = {
-    openai: 24000,
-    gemini: 17000,
-    claude: 32000
+    openai: 45000,
+    gemini: 60000,
+    claude: 60000
   };
   const maxAttempts = provider === 'openai' ? 2 : provider === 'claude' ? 2 : 1;
   const endpoint = endpoints[provider];
