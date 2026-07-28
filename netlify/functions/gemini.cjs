@@ -10,6 +10,6 @@ exports.handler = async (event) => {
     return response(200,parseJson(j.candidates?.[0]?.content?.parts?.[0]?.text));
    } catch (e) {
   console.error('Gemini function error:', e.message);
-  return response(500, { error: e.message );
+  return response(500, { error: e.message} );
 }
 };
