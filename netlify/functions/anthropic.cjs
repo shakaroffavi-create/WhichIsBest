@@ -12,7 +12,7 @@ exports.handler = async (event) => {
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-5',
+    model: process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001',
     max_tokens: 700,
     messages: [
       {
