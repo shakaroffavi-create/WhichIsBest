@@ -68,7 +68,7 @@
 
 [[redirects]]
   from = "/api/claude"
-  to = "/.netlify/functions/claude"
+  to = "/.netlify/functions/anthropic"
   status = 200
 
 
