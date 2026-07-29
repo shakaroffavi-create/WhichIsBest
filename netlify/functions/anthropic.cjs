@@ -13,7 +13,7 @@ exports.handler = async (event) => {
   },
   body: JSON.stringify({
     model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-5',
-    max_tokens: 1800,
+    max_tokens: 700,
     messages: [
       {
         role: 'user',
