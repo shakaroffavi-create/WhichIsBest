@@ -364,7 +364,7 @@ async function requestSingleProvider(provider, payload) {
   const endpoints = {
     openai: '/api/openai',
     gemini: '/api/gemini',
-    claude: '/api/claude'
+    claude: '/.netlify/functions/anthropic'
   };
   const timeoutByProvider = {
     openai: 45000,
