@@ -392,7 +392,35 @@ async function requestSingleProvider(provider, payload) {
         throw new Error(data?.error || data?.message || `שגיאת שרת ${response.status}`);
       }
 
-      const providerResult = data?.providers?.[0];
+      let providerResult = data?.providers?.[0];
+
+      if (!providerResult && Array.isArray(data?.ranking)) {
+        const parsed = {
+          ...data,
+          ranking: data.ranking.map(item => ({
+            ...item,
+            why: item?.why || item?.reason || '',
+            analysis: item?.analysis || item?.reason || '',
+            advantages: Array.isArray(item?.advantages) ? item.advantages : (data.advantages || []),
+            risks: Array.isArray(item?.risks) ? item.risks : (data.risks || []),
+            conditions: Array.isArray(item?.conditions) ? item.conditions : []
+          }))
+        };
+
+        providerResult = {
+          provider: providerDisplayName(provider),
+          status: 'ok',
+          parsed,
+          error: ''
+        };
+
+        data.providers = [providerResult];
+        data.consensus = {
+          ranking: parsed.ranking,
+          providerCount: 1,
+          summary: parsed.summary || ''
+        };
+      }
       const retryableMessage = String(providerResult?.error || '').toLowerCase();
       const retryable =
         providerResult?.status === 'error' &&
