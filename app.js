@@ -523,7 +523,7 @@ async function requestSingleProvider(provider, payload) {
         throw new Error(data?.error || data?.message || `שגיאת שרת ${response.status}`);
       }
 
-      const providerResult = data?.providers?.[0];      let providerResult = data?.providers?.[0];
+           let providerResult = data?.providers?.[0];
 
       if (!providerResult && data && typeof data === 'object' && Array.isArray(data.ranking)) {
         const sharedAdvantages = Array.isArray(data.advantages) ? data.advantages : [];
