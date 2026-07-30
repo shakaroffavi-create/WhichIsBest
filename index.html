@@ -7,14 +7,14 @@
   <meta name="description" content="WICHISBEST עוזרת להשוות עד שלוש אפשרויות, לשמור העדפות ולקבל תמונת החלטה ברורה.">
   <meta name="wichisbest-version" content="3.0.0">
   <title>WICHISBEST 3.0 — משווים. מבינים. מחליטים.</title>
-  <link rel="stylesheet" href="style.css?v=5.3.0-ui-refinements">
+  <link rel="stylesheet" href="style.css?v=5.3.1-responsive-refinement">
 
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
 (function(){
-  const build='5.3.0-ui-refinements';
+  const build='5.3.1-responsive-refinement';
   try{
     const previous=localStorage.getItem('wichisbest-build');
     if(previous!==build){
@@ -44,7 +44,6 @@
     <section class="hero">
       <div class="shell hero-grid">
         <div class="hero-copy">
-          <div class="version-pill"><span></span> גרסה 5.3 Alpha — ממשק נקי וקריא</div>
           <h1>נטרל רעשי רקע.<br><em>קבל החלטה מושכלת.</em></h1>
           <p>כתוב את השאלה, העלה מסמך או תמונה והגדר מה חשוב לך. WICHISBEST מרכזת את המידע, משווה בין החלופות ומציגה ניתוח ברור ושקוף.</p>
           <div class="hero-actions">
@@ -90,6 +89,10 @@
             </div>
             <textarea id="background" rows="6" maxlength="2500" placeholder="ספר על המצב הנוכחי, המטרה והפרטים שחשוב להביא בחשבון..."></textarea>
             <div class="counter"><span id="voice-status">אפשר לכתוב או להכתיב בקול</span><span id="background-count">0/2500</span></div>
+            <div class="background-source">
+              <label for="source-link">קישור למידע נוסף <small>(אופציונלי)</small></label>
+              <input id="source-link" type="url" inputmode="url" placeholder="https://example.com">
+            </div>
           </div>
 
           <div class="field">
@@ -157,7 +160,6 @@
                 <div id="file-list" class="file-list"></div>
               </div>
 
-              <div class="field"><label for="source-link">קישור למקור מידע</label><input id="source-link" type="url" placeholder="https://example.com"></div>
 
               <div class="memory-choice">
                 <label><input id="save-profile" type="checkbox"><span><strong>לשמור את הרקע והשיקולים לפעם הבאה</strong><small>נשמרים בדפדפן זה בלבד. ניתן לצפות, לערוך ולמחוק בכל עת.</small></span></label>
@@ -191,8 +193,9 @@
     </section>
   </main>
 
-  <footer><div class="shell footer-inner"><div class="brand"><span class="brand-mark">W</span><span>WICHISBEST</span></div><p>גרסה 5.2 Alpha · קריטריונים ומשקלים</p></div></footer>
-  <script src="app.js?v=5.3.0-ui-refinements"></script>
+  <footer><div class="shell footer-inner"><div class="brand"><span class="brand-mark">W</span><span>WICHISBEST</span></div><p>גרסה 5.3 Alpha · קריטריונים ומשקלים</p></div></footer>
+  <script src="app.js?v=5.3.1-responsive-refinement"></script>
 </body>
 </html>
+
 

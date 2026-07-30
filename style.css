@@ -316,3 +316,21 @@
     align-items: flex-start;
   }
 }
+
+/* v5.3.1 — compact hero, responsive spacing and background source */
+.hero{min-height:auto}
+.hero-grid{padding-top:52px;padding-bottom:64px}
+.background-source{margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.background-source label{display:flex;align-items:baseline;gap:6px;margin-bottom:8px}
+.background-source label small{font-size:12px;font-weight:600;color:#718096}
+.background-source input{direction:ltr;text-align:left}
+
+@media(max-width:960px){
+  .hero-grid{padding-top:44px;padding-bottom:54px}
+}
+
+@media(max-width:640px){
+  .hero-grid{padding-top:32px;padding-bottom:42px;gap:34px}
+  .background-source{margin-top:12px;padding-top:12px}
+}
+
