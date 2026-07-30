@@ -74,14 +74,23 @@
           <h2>ספר לנו מה צריך להחליט</h2>
           <p>אפשר להתחיל משאלה קצרה, ולהוסיף רק את החומר שבאמת עוזר להבנת המקרה.</p>
           <ol>
-            <li><b>1</b><span><strong>השאלה</strong><small>מה בדיוק אתה רוצה להכריע?</small></span></li>
-            <li><b>2</b><span><strong>החלופות</strong><small>עד שלוש אפשרויות להשוואה</small></span></li>
-            <li><b>3</b><span><strong>המידע הנוסף</strong><small>רקע, מסמך, תמונה, קישור או קול</small></span></li>
+            <li><b>1</b><span><strong>תיאור הרקע</strong><small>מה המצב ומה חשוב לדעת?</small></span></li>
+            <li><b>2</b><span><strong>השאלה המרכזית</strong><small>מה בדיוק אתה רוצה להכריע?</small></span></li>
+            <li><b>3</b><span><strong>מידע וחלופות</strong><small>מסמך או תמונה, ואז שלוש אפשרויות</small></span></li>
           </ol>
         </aside>
 
         <form id="decision-form" class="decision-card" novalidate>
           <div class="card-title"><div><small>שלב 1 מתוך 3</small><h3>פרטי ההחלטה</h3></div><span id="local-indicator">נשמר מקומית בלבד</span></div>
+
+          <div class="field primary-input">
+            <div class="label-row">
+              <label for="background">תיאור הרקע</label>
+              <button id="voice-button" class="microphone" type="button" data-voice-target="#background" data-voice-status="#voice-status">🎤 הכתבה</button>
+            </div>
+            <textarea id="background" rows="6" maxlength="2500" placeholder="ספר על המצב הנוכחי, המטרה והפרטים שחשוב להביא בחשבון..."></textarea>
+            <div class="counter"><span id="voice-status">אפשר לכתוב או להכתיב בקול</span><span id="background-count">0/2500</span></div>
+          </div>
 
           <div class="field">
             <label for="category">קטגוריה</label>
@@ -89,13 +98,13 @@
           </div>
 
           <div class="field">
-            <label for="question">השאלה המרכזית</label>
+            <div class="label-row"><label for="question">השאלה המרכזית</label><button class="microphone" type="button" data-voice-target="#question" data-voice-status="#question-voice-status">🎤 הכתבה</button></div>
             <textarea id="question" rows="4" maxlength="1000" required placeholder="לדוגמה: האם עדיף להיכנס להשקעה עכשיו, להמתין או לפעול בהדרגה?"></textarea>
             <div class="question-tools">
               <button type="button" id="upload-inline-button" class="inline-upload-link">📎 צרף מסמך או תמונה</button>
               <span>PDF, Word, Excel, PowerPoint או תמונה</span>
             </div>
-            <div class="counter"><span>משפט אחד ברור מספיק להתחלה</span><span id="question-count">0/1000</span></div>
+            <div class="counter"><span id="question-voice-status">משפט אחד ברור מספיק להתחלה</span><span id="question-count">0/1000</span></div>
           </div>
 
           <div class="options-grid">
@@ -142,12 +151,6 @@
           <section class="context-panel" id="context-panel">
             <button class="context-toggle" id="context-toggle" type="button" aria-expanded="false"><span><b>＋</b><span><strong>הוספת מידע נוסף</strong><small>רקע, מסמכים, תמונה, קישור או הכתבה</small></span></span><em>אופציונלי</em></button>
             <div class="context-body" id="context-body" hidden>
-              <div class="field">
-                <div class="label-row"><label for="background">תיאור הרקע</label><button id="voice-button" class="microphone" type="button">🎤 הכתבה</button></div>
-                <textarea id="background" rows="6" maxlength="2500" placeholder="ספר על הניסיון שלך, המטרה, המצב הנוכחי והפרטים שחשוב להביא בחשבון..."></textarea>
-                <div class="counter"><span id="voice-status">אפשר לכתוב או להכתיב בקול</span><span id="background-count">0/2500</span></div>
-              </div>
-
               <div class="upload-zone" id="upload-zone">
                 <input id="attachments" type="file" multiple accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,image/*" hidden>
                 <button type="button" id="upload-button"><span>⇧</span><strong>צרף מסמך או תמונה</strong><small>PDF, Word, Excel, PowerPoint או תמונה</small></button>
@@ -192,3 +195,4 @@
   <script src="app.js?v=5.3.0-ui-refinements"></script>
 </body>
 </html>
+

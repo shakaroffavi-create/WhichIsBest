@@ -99,21 +99,61 @@ function renderFiles() {
 }
 
 function setupVoice() {
+  const buttons = $$('[data-voice-target]');
+  if (!buttons.length) return;
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) { voiceButton.disabled = true; voiceButton.title = 'הדפדפן אינו תומך בהכתבה'; return; }
+  if (!SpeechRecognition) {
+    buttons.forEach(button => {
+      button.disabled = true;
+      button.title = 'הדפדפן אינו תומך בהכתבה';
+    });
+    return;
+  }
+
   recognition = new SpeechRecognition();
   recognition.lang = 'he-IL';
   recognition.interimResults = true;
+  let activeButton = null;
+  let activeTarget = null;
+  let activeStatus = null;
   let base = '';
-  recognition.onstart = () => { base = background.value.trim(); voiceButton.classList.add('recording'); voiceButton.textContent = '⏹ עצירה'; voiceStatus.textContent = 'מקשיב…'; };
-  recognition.onresult = (event) => {
-    const transcript = [...event.results].map(r => r[0].transcript).join(' ');
-    background.value = `${base}${base ? ' ' : ''}${transcript}`.slice(0, 2500);
-    updateCounters();
+
+  function resetVoice(message = 'ההכתבה נוספה לשדה') {
+    if (activeButton) {
+      activeButton.classList.remove('recording');
+      activeButton.textContent = '🎤 הכתבה';
+    }
+    if (activeStatus) activeStatus.textContent = message;
+    activeButton = activeTarget = activeStatus = null;
+  }
+
+  recognition.onstart = () => {
+    base = activeTarget?.value.trim() || '';
+    activeButton?.classList.add('recording');
+    if (activeButton) activeButton.textContent = '⏹ עצירה';
+    if (activeStatus) activeStatus.textContent = 'מקשיב…';
   };
-  recognition.onend = () => { voiceButton.classList.remove('recording'); voiceButton.textContent = '🎤 הכתבה'; voiceStatus.textContent = 'ההכתבה נוספה לתיאור הרקע'; };
-  recognition.onerror = () => { voiceStatus.textContent = 'לא ניתן היה להשתמש במיקרופון'; };
-  if (voiceButton) voiceButton.addEventListener('click', () => voiceButton.classList.contains('recording') ? recognition.stop() : recognition.start());
+  recognition.onresult = (event) => {
+    if (!activeTarget) return;
+    const transcript = [...event.results].map(result => result[0].transcript).join(' ');
+    const limit = Number(activeTarget.maxLength) > 0 ? Number(activeTarget.maxLength) : 2500;
+    activeTarget.value = `${base}${base ? ' ' : ''}${transcript}`.slice(0, limit);
+    activeTarget.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+  recognition.onend = () => resetVoice();
+  recognition.onerror = () => resetVoice('לא ניתן היה להשתמש במיקרופון');
+
+  buttons.forEach(button => button.addEventListener('click', () => {
+    if (button.classList.contains('recording')) {
+      recognition.stop();
+      return;
+    }
+    activeButton = button;
+    activeTarget = document.querySelector(button.dataset.voiceTarget);
+    activeStatus = document.querySelector(button.dataset.voiceStatus || '');
+    if (!activeTarget) return resetVoice('שדה ההכתבה לא נמצא');
+    try { recognition.start(); } catch { resetVoice('המיקרופון כבר פעיל'); }
+  }));
 }
 setupVoice();
 
@@ -392,35 +432,7 @@ async function requestSingleProvider(provider, payload) {
         throw new Error(data?.error || data?.message || `שגיאת שרת ${response.status}`);
       }
 
-      let providerResult = data?.providers?.[0];
-
-      if (!providerResult && Array.isArray(data?.ranking)) {
-        const parsed = {
-          ...data,
-          ranking: data.ranking.map(item => ({
-            ...item,
-            why: item?.why || item?.reason || '',
-            analysis: item?.analysis || item?.reason || '',
-            advantages: Array.isArray(item?.advantages) ? item.advantages : (data.advantages || []),
-            risks: Array.isArray(item?.risks) ? item.risks : (data.risks || []),
-            conditions: Array.isArray(item?.conditions) ? item.conditions : []
-          }))
-        };
-
-        providerResult = {
-          provider: providerDisplayName(provider),
-          status: 'ok',
-          parsed,
-          error: ''
-        };
-
-        data.providers = [providerResult];
-        data.consensus = {
-          ranking: parsed.ranking,
-          providerCount: 1,
-          summary: parsed.summary || ''
-        };
-      }
+      const providerResult = data?.providers?.[0];
       const retryableMessage = String(providerResult?.error || '').toLowerCase();
       const retryable =
         providerResult?.status === 'error' &&
@@ -831,3 +843,4 @@ checkHealth();
 try { initializeCriteriaEditor(); } catch (error) { console.warn('Criteria editor:', error); }
 
 try { initializeInlineUpload(); } catch (error) { console.warn('Inline upload:', error); }
+
