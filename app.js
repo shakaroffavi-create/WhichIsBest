@@ -105,7 +105,7 @@ function setupVoice() {
   if (!SpeechRecognition) {
     buttons.forEach(button => {
       button.disabled = true;
-      button.title = 'הדפדפן אינו תומך בהכתבה';
+      button.title = 'הדפדפן אינו תומך בהכתבה. באייפון אפשר להשתמש במיקרופון שבמקלדת.';
     });
     return;
   }
@@ -113,47 +113,136 @@ function setupVoice() {
   recognition = new SpeechRecognition();
   recognition.lang = 'he-IL';
   recognition.interimResults = true;
+  recognition.continuous = true;
+
   let activeButton = null;
   let activeTarget = null;
   let activeStatus = null;
   let base = '';
+  let shouldListen = false;
+  let restartTimer = null;
+  let starting = false;
+  let startFailures = 0;
 
-  function resetVoice(message = 'ההכתבה נוספה לשדה') {
+  function clearRestart() {
+    if (restartTimer) clearTimeout(restartTimer);
+    restartTimer = null;
+  }
+
+  function paintListening() {
+    activeButton?.classList.add('recording');
+    if (activeButton) activeButton.textContent = '⏹ עצירה';
+    if (activeStatus) activeStatus.textContent = 'מקשיב ברצף… לחץ שוב לעצירה';
+  }
+
+  function paintStopped(message = 'ההכתבה נוספה לשדה') {
     if (activeButton) {
       activeButton.classList.remove('recording');
       activeButton.textContent = '🎤 הכתבה';
     }
     if (activeStatus) activeStatus.textContent = message;
-    activeButton = activeTarget = activeStatus = null;
+  }
+
+  function startRecognition() {
+    if (!shouldListen || !activeTarget || starting) return;
+    clearRestart();
+    starting = true;
+    base = activeTarget.value.trim();
+    try {
+      recognition.start();
+    } catch {
+      starting = false;
+      startFailures += 1;
+      if (startFailures >= 4) {
+        shouldListen = false;
+        const iphoneHint = /iPhone|iPad|iPod/i.test(navigator.userAgent)
+          ? ' באייפון אפשר להמשיך באמצעות המיקרופון שבמקלדת.'
+          : '';
+        paintStopped(`הדפדפן עצר את ההכתבה.${iphoneHint}`);
+        return;
+      }
+      restartTimer = setTimeout(startRecognition, 350);
+    }
+  }
+
+  function stopVoice(message = 'ההכתבה נעצרה') {
+    shouldListen = false;
+    clearRestart();
+    paintStopped(message);
+    try { recognition.stop(); } catch {}
   }
 
   recognition.onstart = () => {
+    starting = false;
+    startFailures = 0;
     base = activeTarget?.value.trim() || '';
-    activeButton?.classList.add('recording');
-    if (activeButton) activeButton.textContent = '⏹ עצירה';
-    if (activeStatus) activeStatus.textContent = 'מקשיב…';
+    paintListening();
   };
+
   recognition.onresult = (event) => {
     if (!activeTarget) return;
-    const transcript = [...event.results].map(result => result[0].transcript).join(' ');
+    const transcript = [...event.results].map(result => result[0].transcript).join(' ').trim();
     const limit = Number(activeTarget.maxLength) > 0 ? Number(activeTarget.maxLength) : 2500;
-    activeTarget.value = `${base}${base ? ' ' : ''}${transcript}`.slice(0, limit);
+    activeTarget.value = `${base}${base && transcript ? ' ' : ''}${transcript}`.slice(0, limit);
     activeTarget.dispatchEvent(new Event('input', { bubbles: true }));
   };
-  recognition.onend = () => resetVoice();
-  recognition.onerror = () => resetVoice('לא ניתן היה להשתמש במיקרופון');
 
-  buttons.forEach(button => button.addEventListener('click', () => {
-    if (button.classList.contains('recording')) {
-      recognition.stop();
+  recognition.onend = () => {
+    starting = false;
+    if (shouldListen && activeTarget) {
+      paintListening();
+      restartTimer = setTimeout(startRecognition, 300);
       return;
     }
+    paintStopped();
+  };
+
+  recognition.onerror = (event) => {
+    starting = false;
+    const code = event?.error || '';
+    if (code === 'no-speech' && shouldListen) {
+      restartTimer = setTimeout(startRecognition, 300);
+      return;
+    }
+    if (code === 'aborted') return;
+    shouldListen = false;
+    clearRestart();
+    const iphoneHint = /iPhone|iPad|iPod/i.test(navigator.userAgent)
+      ? ' באייפון אפשר גם להשתמש במיקרופון שבמקלדת.'
+      : '';
+    paintStopped(`לא ניתן להשתמש במיקרופון.${iphoneHint}`);
+  };
+
+  buttons.forEach(button => button.addEventListener('click', () => {
+    const nextTarget = document.querySelector(button.dataset.voiceTarget);
+    const nextStatus = document.querySelector(button.dataset.voiceStatus || '');
+    if (!nextTarget) return;
+
+    if (shouldListen && button === activeButton) {
+      stopVoice('ההכתבה נעצרה');
+      return;
+    }
+
+    if (shouldListen) stopVoice('ההכתבה נעצרה במעבר לשדה אחר');
     activeButton = button;
-    activeTarget = document.querySelector(button.dataset.voiceTarget);
-    activeStatus = document.querySelector(button.dataset.voiceStatus || '');
-    if (!activeTarget) return resetVoice('שדה ההכתבה לא נמצא');
-    try { recognition.start(); } catch { resetVoice('המיקרופון כבר פעיל'); }
+    activeTarget = nextTarget;
+    activeStatus = nextStatus;
+    shouldListen = true;
+    paintListening();
+    setTimeout(startRecognition, 120);
   }));
+
+  form?.addEventListener('focusin', (event) => {
+    const next = event.target;
+    if (!shouldListen || !activeTarget || next === activeTarget) return;
+    if (next.matches('textarea, input, select')) {
+      stopVoice('ההכתבה נעצרה במעבר לשדה אחר');
+    }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && shouldListen) stopVoice('ההכתבה נעצרה');
+  });
 }
 setupVoice();
 

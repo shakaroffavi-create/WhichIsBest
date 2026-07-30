@@ -7,14 +7,14 @@
   <meta name="description" content="WICHISBEST עוזרת להשוות עד שלוש אפשרויות, לשמור העדפות ולקבל תמונת החלטה ברורה.">
   <meta name="wichisbest-version" content="3.0.0">
   <title>WICHISBEST 3.0 — משווים. מבינים. מחליטים.</title>
-  <link rel="stylesheet" href="style.css?v=5.3.1-responsive-refinement">
+  <link rel="stylesheet" href="style.css?v=5.3.2-continuous-voice">
 
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
 (function(){
-  const build='5.3.1-responsive-refinement';
+  const build='5.3.2-continuous-voice';
   try{
     const previous=localStorage.getItem('wichisbest-build');
     if(previous!==build){
@@ -82,6 +82,11 @@
         <form id="decision-form" class="decision-card" novalidate>
           <div class="card-title"><div><small>שלב 1 מתוך 3</small><h3>פרטי ההחלטה</h3></div><span id="local-indicator">נשמר מקומית בלבד</span></div>
 
+          <div class="field">
+            <label for="category">קטגוריה</label>
+            <select id="category" required><option value="">בחר קטגוריה</option><option>שוק ההון</option><option>נדל״ן והשקעות</option><option>אחר</option></select>
+          </div>
+
           <div class="field primary-input">
             <div class="label-row">
               <label for="background">תיאור הרקע</label>
@@ -93,11 +98,6 @@
               <label for="source-link">קישור למידע נוסף <small>(אופציונלי)</small></label>
               <input id="source-link" type="url" inputmode="url" placeholder="https://example.com">
             </div>
-          </div>
-
-          <div class="field">
-            <label for="category">קטגוריה</label>
-            <select id="category" required><option value="">בחר קטגוריה</option><option>שוק ההון</option><option>נדל״ן והשקעות</option><option>אחר</option></select>
           </div>
 
           <div class="field">
@@ -194,8 +194,9 @@
   </main>
 
   <footer><div class="shell footer-inner"><div class="brand"><span class="brand-mark">W</span><span>WICHISBEST</span></div><p>גרסה 5.3 Alpha · קריטריונים ומשקלים</p></div></footer>
-  <script src="app.js?v=5.3.1-responsive-refinement"></script>
+  <script src="app.js?v=5.3.2-continuous-voice"></script>
 </body>
 </html>
+
 
 
