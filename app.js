@@ -354,7 +354,7 @@ function collectForm() {
     considerations: $('#considerations').value.trim(),
     criteria: collectCriteria(),
     background: background.value.trim(),
-    sourceLink: $('#source-link').value.trim(),
+    sourceLink: '',
     files: selectedFiles.map(f => ({ name:f.name, type:f.type, size:f.size })),
     memory: $('#save-profile').checked ? [$('#considerations').value.trim(), background.value.trim(), collectCriteria().map(c => `${c.name} (${c.weight}/10)`).join(', ')].filter(Boolean) : []
   };
@@ -932,4 +932,5 @@ checkHealth();
 try { initializeCriteriaEditor(); } catch (error) { console.warn('Criteria editor:', error); }
 
 try { initializeInlineUpload(); } catch (error) { console.warn('Inline upload:', error); }
+
 
