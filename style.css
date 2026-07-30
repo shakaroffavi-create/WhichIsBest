@@ -333,4 +333,14 @@
   .hero-grid{padding-top:32px;padding-bottom:42px;gap:34px}
   .background-source{margin-top:12px;padding-top:12px}
 }
-
+/* שיפור הקריאות של תשובות המודלים */
+.rank-details .perspective p,
+.rank-details .full-analysis p,
+.rank-details .provider-perspective p,
+.rank-details li,
+.consensus-summary,
+.results-note p {
+  color: #0b1220 !important;
+  opacity: 1;
+  font-weight: 500;
+}
