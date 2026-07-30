@@ -76,3 +76,9 @@
   from = "/api/claude-debug"
   to = "/.netlify/functions/claude-debug"
   status = 200
+
+[[redirects]]
+  from = "/api/grok"
+  to = "/.netlify/functions/grok"
+  status = 200
+

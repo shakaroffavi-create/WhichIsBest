@@ -402,7 +402,7 @@ function fallbackAnalysis(payload) {
     risks:['נדרש מידע נוסף לאימות ההחלטה'],
     conditions:['חיבור מודלי AI עשוי לשנות את הדירוג']
   }));
-  return { ok:true, providers:[{provider:'ChatGPT',status:'not_configured'},{provider:'Gemini',status:'not_configured'},{provider:'Claude',status:'not_configured'}], consensus:{ranking,providerCount:0,summary:'האתר עובד, אך מפתחות המודלים עדיין אינם מוגדרים ב־Netlify.'} };
+  return { ok:true, providers:[{provider:'ChatGPT',status:'not_configured'},{provider:'Gemini',status:'not_configured'},{provider:'Claude',status:'not_configured'},{provider:'Grok',status:'not_configured'}], consensus:{ranking,providerCount:0,summary:'האתר עובד, אך מפתחות המודלים עדיין אינם מוגדרים ב־Netlify.'} };
 }
 
 
@@ -493,14 +493,16 @@ async function requestSingleProvider(provider, payload) {
   const endpoints = {
     openai: '/api/openai',
     gemini: '/api/gemini',
-    claude: '/.netlify/functions/anthropic'
+    claude: '/.netlify/functions/anthropic',
+    grok: '/api/grok'
   };
   const timeoutByProvider = {
     openai: 45000,
     gemini: 60000,
-    claude: 60000
+    claude: 60000,
+    grok: 60000
   };
-  const maxAttempts = provider === 'openai' ? 2 : provider === 'claude' ? 2 : 1;
+  const maxAttempts = ['openai', 'claude', 'grok'].includes(provider) ? 2 : 1;
   const endpoint = endpoints[provider];
 
   if (!endpoint) throw new Error('מודל לא מוכר');
@@ -546,7 +548,7 @@ async function requestSingleProvider(provider, payload) {
 }
 
 function providerDisplayName(key) {
-  return key === 'openai' ? 'ChatGPT' : key === 'gemini' ? 'Gemini' : key === 'claude' ? 'Claude' : key;
+  return key === 'openai' ? 'ChatGPT' : key === 'gemini' ? 'Gemini' : key === 'claude' ? 'Claude' : key === 'grok' ? 'Grok' : key;
 }
 
 function providerFailure(key, error) {
@@ -563,7 +565,7 @@ function providerFailure(key, error) {
 }
 
 function combineProgressiveAnalyses(payload, rawByProvider, pendingKeys = []) {
-  const providerKeys = ['openai', 'gemini', 'claude'];
+  const providerKeys = ['openai', 'gemini', 'claude', 'grok'];
   const providers = [];
 
   for (const key of providerKeys) {
@@ -666,13 +668,13 @@ if (form) form.addEventListener('submit', async (event) => {
     }
   }
 
-  const providerKeys = ['openai', 'gemini', 'claude'];
+  const providerKeys = ['openai', 'gemini', 'claude', 'grok'];
   const rawByProvider = {};
   const pending = new Set(providerKeys);
   const decisionId = safeDecisionId();
   let firstAnswerShown = false;
 
-  showMessage('ChatGPT ו־Gemini מנתחים במקביל. במקרה של timeout יתבצע ניסיון נוסף אוטומטי.', 'working');
+  showMessage('ארבעת מודלי ה־AI מנתחים במקביל. במקרה של timeout יתבצע ניסיון נוסף אוטומטי.', 'working');
 
   const updateScreen = () => {
     const analysis = combineProgressiveAnalyses(payload, rawByProvider, [...pending]);
@@ -783,7 +785,7 @@ function renderResults(decision) {
           p.diagnostics?.provider ? `provider: ${p.diagnostics.provider}` : '',
           p.diagnostics?.attempts ? `attempts: ${p.diagnostics.attempts}` : ''
         ].filter(Boolean).join(' | ');
-        return `<div class="perspective provider-perspective provider-error"><strong>${escapeHtml(p.provider)} — שגיאת חיבור</strong><p>${escapeHtml(diagnosticText || 'לא התקבלה תשובה מהמודל.')}</p><p><small>בדיקה מלאה: /api/claude-debug</small></p></div>`;
+        return `<div class="perspective provider-perspective provider-error"><strong>${escapeHtml(p.provider)} — שגיאת חיבור</strong><p>${escapeHtml(diagnosticText || 'לא התקבלה תשובה מהמודל.')}</p></div>`;
       }
       if (p.status === 'not_configured') {
         return `<div class="perspective provider-perspective"><strong>${escapeHtml(p.provider)}</strong><p>המפתח עדיין לא הוגדר ב־Netlify.</p></div>`;
@@ -932,5 +934,6 @@ checkHealth();
 try { initializeCriteriaEditor(); } catch (error) { console.warn('Criteria editor:', error); }
 
 try { initializeInlineUpload(); } catch (error) { console.warn('Inline upload:', error); }
+
 
 
