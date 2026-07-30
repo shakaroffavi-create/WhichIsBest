@@ -523,7 +523,39 @@ async function requestSingleProvider(provider, payload) {
         throw new Error(data?.error || data?.message || `שגיאת שרת ${response.status}`);
       }
 
-      const providerResult = data?.providers?.[0];
+      const providerResult = data?.providers?.[0];      let providerResult = data?.providers?.[0];
+
+      if (!providerResult && data && typeof data === 'object' && Array.isArray(data.ranking)) {
+        const sharedAdvantages = Array.isArray(data.advantages) ? data.advantages : [];
+        const sharedRisks = Array.isArray(data.risks) ? data.risks : [];
+        const sharedConditions = Array.isArray(data.conditions) ? data.conditions : [];
+
+        const parsed = {
+          ...data,
+          ranking: data.ranking.map(item => ({
+            ...item,
+            why: item?.why || item?.reason || '',
+            analysis: item?.analysis || item?.explanation || item?.rationale || item?.reason || '',
+            advantages: Array.isArray(item?.advantages) ? item.advantages : sharedAdvantages,
+            risks: Array.isArray(item?.risks) ? item.risks : sharedRisks,
+            conditions: Array.isArray(item?.conditions) ? item.conditions : sharedConditions
+          }))
+        };
+
+        providerResult = {
+          provider: providerDisplayName(provider),
+          status: 'ok',
+          parsed,
+          error: ''
+        };
+
+        data.providers = [providerResult];
+        data.consensus = {
+          ranking: parsed.ranking,
+          providerCount: 1,
+          summary: parsed.summary || ''
+        };
+      }
       const retryableMessage = String(providerResult?.error || '').toLowerCase();
       const retryable =
         providerResult?.status === 'error' &&
