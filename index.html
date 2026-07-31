@@ -7,7 +7,7 @@
   <meta name="description" content="WICHISBEST עוזרת להשוות עד שלוש אפשרויות, לשמור העדפות ולקבל תמונת החלטה ברורה.">
   <meta name="wichisbest-version" content="3.0.0">
   <title>WICHISBEST 3.0 — משווים. מבינים. מחליטים.</title>
-  <link rel="stylesheet" href="style.css?v=5.3.3-api-recovery">
+  <link rel="stylesheet" href="style.css?v=5.4-guided-decision">
 
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -45,13 +45,13 @@
       <div class="shell hero-grid">
         <div class="hero-copy">
           <h1>החלטה מורכבת?<br><em>קבלו תמונה אחת ברורה.</em></h1>
-          <p>כתוב את השאלה, העלה מסמך או תמונה והגדר מה חשוב לך. WICHISBEST מרכזת את המידע, משווה בין החלופות ומציגה ניתוח ברור ושקוף.</p>
+          <p>מספר מודלי AI מנתחים את החלופות, הקריטריונים והמידע שלכם — ומציגים דירוג מוסבר, הסכמות, מחלוקות וסיכונים.</p>
           <div class="hero-actions">
-            <a class="button primary" href="#compare">עזור לי להחליט <span>←</span></a>
-            <a class="button quiet" href="#memory">איך הזיכרון עובד?</a>
+            <a class="button primary" href="#compare">נתחו את ההתלבטות שלי <span>←</span></a>
+            <a class="button quiet" href="#compare">איך זה עובד?</a>
           </div>
           <div class="hero-proof">
-            <span>✓ שלוש חלופות</span><span>✓ מידע שמור בשליטתך</span><span>✓ התחלה חדשה נקייה</span>
+            <span>✓ מספר מודלי AI</span><span>✓ ניתוח שקוף ומוסבר</span><span>✓ המידע בשליטתכם</span>
           </div>
         </div>
 
@@ -69,18 +69,18 @@
     <section id="compare" class="workspace-section">
       <div class="shell workspace">
         <aside class="workspace-guide">
-          <span class="kicker">NEW COMPARISON</span>
-          <h2>ספר לנו מה צריך להחליט</h2>
-          <p>אפשר להתחיל משאלה קצרה, ולהוסיף רק את החומר שבאמת עוזר להבנת המקרה.</p>
+          <span class="kicker">תהליך החלטה מונחה</span>
+          <h2>בואו נעשה סדר בהחלטה</h2>
+          <p>מתחילים מהתלבטות פשוטה. המערכת תלווה אתכם ותעזור להוסיף רק את המידע שבאמת חשוב.</p>
           <ol>
-            <li><b>1</b><span><strong>תיאור הרקע</strong><small>מה המצב ומה חשוב לדעת?</small></span></li>
-            <li><b>2</b><span><strong>השאלה המרכזית</strong><small>מה בדיוק אתה רוצה להכריע?</small></span></li>
-            <li><b>3</b><span><strong>מידע וחלופות</strong><small>מסמך או תמונה, ואז שלוש אפשרויות</small></span></li>
+            <li><b>1</b><span><strong>מציגים את ההתלבטות</strong><small>מתארים את הרקע, השאלה והחלופות.</small></span></li>
+            <li><b>2</b><span><strong>מגדירים מה חשוב</strong><small>בוחרים קריטריונים ומשקללים סדרי עדיפויות.</small></span></li>
+            <li><b>3</b><span><strong>מקבלים תמונה מלאה</strong><small>דירוג מוסבר, יתרונות, סיכונים והבדלים בין המודלים.</small></span></li>
           </ol>
         </aside>
 
         <form id="decision-form" class="decision-card" novalidate>
-          <div class="card-title"><div><small>שלב 1 מתוך 3</small><h3>פרטי ההחלטה</h3></div><span id="local-indicator">נשמר מקומית בלבד</span></div>
+          <div class="card-title"><div><small>שלב 1 מתוך 4</small><h3>מציגים את ההתלבטות</h3></div><span id="local-indicator">נשמר מקומית בלבד</span></div>
 
           <div class="field">
             <label for="category">קטגוריה</label>
@@ -121,8 +121,8 @@
           <section class="criteria-panel" aria-labelledby="criteria-title">
             <div class="criteria-heading">
               <div>
-                <span class="kicker">DECISION CRITERIA</span>
-                <h3 id="criteria-title">מה חשוב לך בהחלטה?</h3>
+                <span class="kicker">הקריטריונים שלכם</span>
+                <h3 id="criteria-title">מה חשוב לכם בהחלטה?</h3>
                 <p>הוסף קריטריונים וקבע את מידת החשיבות שלהם. המשקלים אינם חייבים להסתכם ב־100.</p>
               </div>
               <button type="button" id="add-criterion" class="button secondary compact">＋ הוסף קריטריון</button>
@@ -165,14 +165,14 @@
           </section>
 
           <div id="form-message" class="form-message" role="status"></div>
-          <button class="button primary submit-button" type="submit">הצגת הדירוג <span>←</span></button>
+          <button class="button primary submit-button" type="submit">נתחו את ההתלבטות שלי <span>←</span></button>
         </form>
       </div>
     </section>
 
     <section id="results" class="results-section" hidden>
       <div class="shell results-card">
-        <div class="results-head"><div><span class="kicker">WICHISBEST RANKING</span><h2>הדירוג שלך מוכן</h2><p id="result-question"></p></div><span id="analysis-badge" class="simulation-badge">מכין ניתוח</span></div>
+        <div class="results-head"><div><span class="kicker">הדירוג המשולב</span><h2>הדירוג שלך מוכן</h2><p id="result-question"></p></div><span id="analysis-badge" class="simulation-badge">מכין ניתוח</span></div>
         <p id="consensus-summary" class="consensus-summary"></p>
         <div id="provider-strip" class="provider-strip" aria-label="סטטוס המודלים"></div>
         <div id="ranking-list" class="ranking-list"></div>
@@ -183,8 +183,8 @@
 
     <section id="memory" class="dashboard-section">
       <div class="shell dashboard-grid">
-        <article class="dashboard-card featured"><span class="kicker">PERSONAL MEMORY</span><h2>הזיכרון שלך נשאר בשליטתך</h2><p>האתר יכול לזכור רקע ושיקולים שבחרת לשמור, ולהציע אותם בהחלטה הבאה. התחלה חדשה מנקה את הטופס — אך אינה מוחקת את הפרופיל השמור.</p><div class="memory-status" id="memory-status"><span></span><strong>לא נשמר עדיין מידע אישי</strong></div></article>
-        <article class="dashboard-card" id="history"><div class="dashboard-title"><div><span class="kicker">HISTORY</span><h3>החלטות אחרונות</h3></div><button id="clear-history" type="button">ניקוי היסטוריה</button></div><div id="history-list" class="history-list"><p class="empty-state">עדיין אין החלטות שמורות.</p></div></article>
+        <article class="dashboard-card featured"><span class="kicker">הזיכרון האישי</span><h2>הזיכרון שלך נשאר בשליטתך</h2><p>האתר יכול לזכור רקע ושיקולים שבחרת לשמור, ולהציע אותם בהחלטה הבאה. התחלה חדשה מנקה את הטופס — אך אינה מוחקת את הפרופיל השמור.</p><div class="memory-status" id="memory-status"><span></span><strong>לא נשמר עדיין מידע אישי</strong></div></article>
+        <article class="dashboard-card" id="history"><div class="dashboard-title"><div><span class="kicker">היסטוריה</span><h3>החלטות אחרונות</h3></div><button id="clear-history" type="button">ניקוי היסטוריה</button></div><div id="history-list" class="history-list"><p class="empty-state">עדיין אין החלטות שמורות.</p></div></article>
       </div>
     </section>
   </main>
@@ -193,7 +193,6 @@
   <script src="app.js?v=5.3.3-api-recovery"></script>
 </body>
 </html>
-
 
 
 
