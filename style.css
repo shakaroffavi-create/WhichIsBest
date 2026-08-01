@@ -353,3 +353,11 @@
   line-height:1.65;
   color:#273b55;
 }
+
+
+/* App install CTA */
+.top-actions{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.install-app-button{border:1px solid #b9cae1;background:#fff;color:#07152b;border-radius:10px;padding:9px 14px;font-weight:800;font-size:13px;cursor:pointer}
+.install-app-button:hover{border-color:#1768e5;color:#1768e5;background:#f4f8ff}
+.install-app-button:focus-visible{outline:3px solid rgba(23,104,229,.25);outline-offset:2px}
+@media(max-width:640px){.topbar-inner{gap:10px}.top-actions{gap:6px}.install-app-button,.top-cta{font-size:11px;padding:8px 9px}.brand{font-size:13px}.brand-mark{width:28px;height:28px}}
