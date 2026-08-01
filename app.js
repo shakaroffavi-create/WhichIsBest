@@ -969,3 +969,46 @@ try { initializeInlineUpload(); } catch (error) { console.warn('Inline upload:',
 
 
 
+
+
+// Installable app experience
+const installAppButton = $('#install-app-button');
+let deferredInstallPrompt = null;
+
+function isAppInstalled() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+});
+
+if (installAppButton) {
+  installAppButton.addEventListener('click', async () => {
+    if (isAppInstalled()) {
+      alert('האפליקציה כבר מותקנת במכשיר הזה.');
+      return;
+    }
+
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      return;
+    }
+
+    const isiPhoneOrIPad = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (isiPhoneOrIPad) {
+      alert('להתקנה באייפון: פתח את whichisbest.com ב-Safari, לחץ על סמל השיתוף ובחר ״הוסף למסך הבית״.');
+      return;
+    }
+
+    alert('פתח את תפריט הדפדפן ובחר ״התקנת WhichIsBest״ או ״הוסף למסך הבית״.');
+  });
+}
+
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  if (installAppButton) installAppButton.textContent = 'האפליקציה הותקנה';
+});
