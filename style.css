@@ -344,38 +344,3 @@
   opacity: 1;
   font-weight: 500;
 }
-
-/* v5.4 — a clearer, guided decision experience */
-body{font-size:16px;line-height:1.65}
-.topbar nav{font-size:15px;font-weight:700;color:#293950}
-.topbar nav a,.top-cta,.button{outline-offset:4px}
-.topbar nav a:focus-visible,.top-cta:focus-visible,.button:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid rgba(23,104,229,.35)}
-.hero-grid{gap:clamp(48px,7vw,88px);padding-top:72px;padding-bottom:80px}
-.hero h1{margin:0 0 28px}
-.hero-copy>p{font-size:20px;line-height:1.75;margin-bottom:34px}
-.hero-actions{gap:14px}.hero-actions .button{min-height:54px;padding-inline:25px}
-.hero-proof{gap:12px;margin-top:30px;font-size:14px;font-weight:700;color:#314158}
-.hero-proof span{padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.72);border:1px solid #dce6f2}
-.workspace-section{padding:112px 0}.workspace{grid-template-columns:minmax(310px,.72fr) minmax(0,1.28fr);gap:clamp(48px,7vw,84px)}
-.workspace-guide>p{font-size:17px;color:#34465d;margin:0;max-width:520px}
-.workspace-guide ol{gap:14px;margin-top:34px}
-.workspace-guide li{align-items:flex-start;gap:14px;padding:18px;border:1px solid #dbe5f1;border-radius:16px;background:#fff;box-shadow:0 8px 24px rgba(12,35,68,.05)}
-.workspace-guide li>b{flex:0 0 38px;width:38px;height:38px;border-radius:12px}
-.workspace-guide li span{gap:3px}.workspace-guide li strong{font-size:16px}.workspace-guide small{font-size:14px;line-height:1.55;color:#52647b}
-.decision-card{border-color:#d5e0ed;padding:clamp(26px,3vw,38px);box-shadow:0 24px 70px rgba(12,35,68,.1)}
-.card-title{padding-bottom:26px;margin-bottom:28px}.card-title h3{font-size:28px}.field{gap:10px;margin-top:22px}.field label{font-size:15px}
-.field input,.field textarea,.field select{padding:14px 15px;line-height:1.55}.options-grid{gap:14px}.criteria-panel{margin-top:26px;padding:24px}.context-panel{margin-top:26px}.submit-button{min-height:56px;margin-top:10px;font-size:16px}
-.dashboard-section,.results-section{padding-block:104px}
-
-@media(max-width:960px){
-  .hero-grid{padding-block:58px;gap:48px}.workspace-section{padding-block:76px}.workspace{gap:44px}
-  .workspace-guide>p{margin-inline:auto}.workspace-guide ol{max-width:600px}
-}
-@media(max-width:640px){
-  .shell{width:min(100% - 32px,1180px)}.topbar-inner{gap:12px}.brand{font-size:14px}.top-cta{white-space:nowrap}
-  .hero-grid{padding-block:42px;gap:36px}.hero h1{margin-bottom:22px}.hero-copy>p{font-size:17px;line-height:1.7;margin-bottom:26px}
-  .hero-actions{gap:10px}.hero-proof{margin-top:24px;text-align:right}.hero-proof span{white-space:normal}
-  .workspace-section,.results-section,.dashboard-section{padding-block:62px}.workspace-guide h2{font-size:2.25rem}.workspace-guide ol{gap:10px;margin-top:26px}
-  .workspace-guide li{padding:15px}.decision-card{padding:20px}.card-title{padding-bottom:20px;margin-bottom:22px}.card-title h3{font-size:23px}
-  .criteria-panel{padding:17px;margin-top:22px}.field{margin-top:19px}.submit-button{margin-top:8px}
-}
