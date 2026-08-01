@@ -6,6 +6,14 @@
   <meta name="theme-color" content="#07152b">
   <meta name="description" content="WICHISBEST עוזרת להשוות עד שלוש אפשרויות, לשמור העדפות ולקבל תמונת החלטה ברורה.">
   <meta name="wichisbest-version" content="3.0.0">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/app-icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/app-icon.svg">
+  <meta name="application-name" content="WhichIsBest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="WhichIsBest">
+  <meta name="mobile-web-app-capable" content="yes">
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-LHFETJZNJQ"></script>
   <script>
@@ -22,7 +30,7 @@
 <meta http-equiv="Expires" content="0">
 <script>
 (function(){
-  const build='5.3.4-ui-refinement';
+  const build='5.3.5-pwa';
   try{
     const previous=localStorage.getItem('wichisbest-build');
     if(previous!==build){
@@ -183,6 +191,13 @@
 
   <footer><div class="shell footer-inner"><div class="brand"><span class="brand-mark">W</span><span>WICHISBEST</span></div><p>גרסה 5.3 Alpha · קריטריונים ומשקלים</p></div></footer>
   <script src="app.js?v=5.3.4-ui-refinement"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>
 
