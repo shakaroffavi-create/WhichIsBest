@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="WhichIsBest">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1768e5"/>
+      <stop offset="1" stop-color="#0b54bd"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#g)"/>
+  <path d="M105 142l72 230 79-145 79 145 72-230h-64l-24 103-63-116-63 116-24-103z" fill="#fff"/>
+  <circle cx="405" cy="111" r="34" fill="#20bf73"/>
+  <path d="M390 111l10 10 21-24" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
