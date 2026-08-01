@@ -7,14 +7,14 @@
   <meta name="description" content="WICHISBEST עוזרת להשוות עד שלוש אפשרויות, לשמור העדפות ולקבל תמונת החלטה ברורה.">
   <meta name="wichisbest-version" content="3.0.0">
   <title>WICHISBEST 3.0 — משווים. מבינים. מחליטים.</title>
-  <link rel="stylesheet" href="style.css?v=5.3.3-api-recovery">
+  <link rel="stylesheet" href="style.css?v=5.3.4-ui-refinement">
 
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
 (function(){
-  const build='5.3.3-api-recovery';
+  const build='5.3.4-ui-refinement';
   try{
     const previous=localStorage.getItem('wichisbest-build');
     if(previous!==build){
@@ -44,7 +44,7 @@
     <section class="hero">
       <div class="shell hero-grid">
         <div class="hero-copy">
-          <h1>נטרל רעשי רקע.<br><em>קבל החלטה מושכלת.</em></h1>
+          <h1>קבל החלטה מושכלת.<br><em>תמחר את רעשי הרקע.</em></h1>
           <p>כתוב את השאלה, העלה מסמך או תמונה והגדר מה חשוב לך. WICHISBEST מרכזת את המידע, משווה בין החלופות ומציגה ניתוח ברור ושקוף.</p>
           <div class="hero-actions">
             <a class="button primary" href="#compare">עזור לי להחליט <span>←</span></a>
@@ -60,7 +60,7 @@
           <div class="source-row"><span class="source-icon">טקסט</span><div><strong>תיאור רקע</strong><small>ניסיון, יעד ורמת סיכון</small></div><b>✓</b></div>
           <div class="source-row"><span class="source-icon">PDF</span><div><strong>דוח מצורף</strong><small>investment-report.pdf</small></div><b>✓</b></div>
           <div class="source-row"><span class="source-icon">קול</span><div><strong>הכתבה קולית</strong><small>נוספה לתיאור הרקע</small></div><b>✓</b></div>
-          <div class="decision-message"><b>91</b><strong>נטרל רעשי רקע.<br>קבל החלטה מושכלת.</strong></div>
+          <div class="decision-message"><b>100</b><strong>קבל החלטה מושכלת.<br>תמחר את רעשי הרקע.</strong></div>
           <p>המחשה של תהליך קבלת החלטה המבוסס על מספר מודלי AI.</p>
         </div>
       </div>
@@ -70,12 +70,12 @@
       <div class="shell workspace">
         <aside class="workspace-guide">
           <span class="kicker">NEW COMPARISON</span>
-          <h2>ספר לנו מה צריך להחליט</h2>
-          <p>אפשר להתחיל משאלה קצרה, ולהוסיף רק את החומר שבאמת עוזר להבנת המקרה.</p>
+          <h2>כך מתקבלת ההמלצה</h2>
+          <p>שלושה צעדים פשוטים בדרך להחלטה ברורה ומנומקת.</p>
           <ol>
-            <li><b>1</b><span><strong>תיאור הרקע</strong><small>מה המצב ומה חשוב לדעת?</small></span></li>
-            <li><b>2</b><span><strong>השאלה המרכזית</strong><small>מה בדיוק אתה רוצה להכריע?</small></span></li>
-            <li><b>3</b><span><strong>מידע וחלופות</strong><small>מסמך או תמונה, ואז שלוש אפשרויות</small></span></li>
+            <li><b>1</b><span><strong>מגדירים את ההתלבטות</strong><small>מוסיפים את הרקע, החלופות והשיקולים החשובים לכם.</small></span></li>
+            <li><b>2</b><span><strong>משקללים את העדיפויות</strong><small>המערכת מזהה מה חשוב לכם באמת וכיצד כל שיקול משפיע על ההחלטה.</small></span></li>
+            <li><b>3</b><span><strong>מקבלים המלצה מנומקת</strong><small>דוח מסכם מציג את החלופה המתאימה ביותר, הציון שלה והסיבות לבחירתה.</small></span></li>
           </ol>
         </aside>
 
@@ -127,23 +127,7 @@
               </div>
               <button type="button" id="add-criterion" class="button secondary compact">＋ הוסף קריטריון</button>
             </div>
-            <div id="criteria-list" class="criteria-list">
-              <div class="criterion-row">
-                <input class="criterion-name" type="text" maxlength="80" placeholder="למשל: סיכון">
-                <label class="criterion-weight"><span>חשיבות</span><input type="range" min="1" max="10" value="8"><output>8</output></label>
-                <button type="button" class="criterion-remove" aria-label="מחיקת קריטריון">×</button>
-              </div>
-              <div class="criterion-row">
-                <input class="criterion-name" type="text" maxlength="80" placeholder="למשל: תשואה או תועלת">
-                <label class="criterion-weight"><span>חשיבות</span><input type="range" min="1" max="10" value="8"><output>8</output></label>
-                <button type="button" class="criterion-remove" aria-label="מחיקת קריטריון">×</button>
-              </div>
-              <div class="criterion-row">
-                <input class="criterion-name" type="text" maxlength="80" placeholder="למשל: זמן">
-                <label class="criterion-weight"><span>חשיבות</span><input type="range" min="1" max="10" value="5"><output>5</output></label>
-                <button type="button" class="criterion-remove" aria-label="מחיקת קריטריון">×</button>
-              </div>
-            </div>
+            <div id="criteria-list" class="criteria-list"></div>
             <div class="criteria-hint">המודלים יתבקשו לנמק כיצד כל חלופה מתאימה לקריטריונים שהגדרת.</div>
           </section>
 
@@ -190,7 +174,7 @@
   </main>
 
   <footer><div class="shell footer-inner"><div class="brand"><span class="brand-mark">W</span><span>WICHISBEST</span></div><p>גרסה 5.3 Alpha · קריטריונים ומשקלים</p></div></footer>
-  <script src="app.js?v=5.3.3-api-recovery"></script>
+  <script src="app.js?v=5.3.4-ui-refinement"></script>
 </body>
 </html>
 
