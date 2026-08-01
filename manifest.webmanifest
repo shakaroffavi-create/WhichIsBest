@@ -1,0 +1,27 @@
+{
+  "name": "WhichIsBest — החלטות חכמות",
+  "short_name": "WhichIsBest",
+  "description": "מערכת חכמה להשוואת אפשרויות ולקבלת החלטה מנומקת.",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4f7fb",
+  "theme_color": "#07152b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
