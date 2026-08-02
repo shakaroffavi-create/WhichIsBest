@@ -23,14 +23,14 @@
     gtag('config', 'G-LHFETJZNJQ');
   </script>
   <title>WICHISBEST 3.0 — משווים. מבינים. מחליטים.</title>
-  <link rel="stylesheet" href="style.css?v=5.3.7-input-fix">
+  <link rel="stylesheet" href="style.css?v=5.3.8-attachments-visible">
 
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
 (function(){
-  const build='5.3.7-input-fix';
+  const build='5.3.8-attachments-visible';
   try{
     const previous=localStorage.getItem('wichisbest-build');
     if(previous!==build){
@@ -115,6 +115,7 @@
               <input id="attachments" class="visually-hidden-file" type="file" multiple accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,image/*">
               <button type="button" id="upload-inline-button" class="inline-upload-link">📎 צרף מסמך או תמונה</button>
               <span>PDF, Word, Excel, PowerPoint או תמונה</span>
+              <div id="file-list" class="file-list" aria-live="polite"></div>
             </div>
           </div>
 
@@ -178,7 +179,6 @@
             <div class="context-body" id="context-body" hidden>
               <div class="upload-zone" id="upload-zone">
                 <button type="button" id="upload-button"><span>⇧</span><strong>צרף מסמך או תמונה</strong><small>PDF, Word, Excel, PowerPoint או תמונה</small></button>
-                <div id="file-list" class="file-list"></div>
               </div>
 
 
@@ -215,7 +215,7 @@
   </main>
 
   <footer><div class="shell footer-inner"><div class="brand"><span class="brand-mark">W</span><span>WICHISBEST</span></div><p>גרסה 5.3 Alpha · קריטריונים ומשקלים</p></div></footer>
-  <script src="app.js?v=5.3.7-input-fix"></script>
+  <script src="app.js?v=5.3.8-attachments-visible"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
