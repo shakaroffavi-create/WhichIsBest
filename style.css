@@ -448,3 +448,32 @@
   .options-grid{grid-template-columns:1fr}
   .option-card{padding:12px}
 }
+
+
+/* Keep selected attachments visible beside the background field */
+.attachment-tools{
+  padding:12px 14px;
+  border:1px solid #d8e2ee;
+  border-radius:12px;
+  background:#f8fbff;
+}
+.attachment-tools .inline-upload-link{
+  display:inline-flex;
+  align-items:center;
+  min-height:36px;
+  padding:6px 10px;
+  border:1px solid #b9cae1;
+  border-radius:9px;
+  background:#fff;
+  text-decoration:none;
+}
+.attachment-tools .file-list{
+  flex-basis:100%;
+  width:100%;
+  margin-top:4px;
+}
+.attachment-tools .file-chip{
+  background:#fff;
+  border-color:#a9bed7;
+  color:#0b1220;
+}
