@@ -124,11 +124,35 @@
             <div class="counter"><span id="question-voice-status">משפט אחד ברור מספיק להתחלה</span><span id="question-count">0/1000</span></div>
           </div>
 
-          <div class="options-grid">
-            <div class="field"><label for="option-a">אפשרות א׳</label><input id="option-a" maxlength="140" placeholder="לדוגמה: לפעול עכשיו"></div>
-            <div class="field"><label for="option-b">אפשרות ב׳</label><input id="option-b" maxlength="140" placeholder="לדוגמה: להמתין"></div>
-            <div class="field"><label for="option-c">אפשרות ג׳</label><input id="option-c" maxlength="140" placeholder="לדוגמה: לפעול בהדרגה"></div>
+          <div id="options-grid" class="options-grid">
+            <div class="field option-card" data-option-row="1">
+              <div class="label-row"><label for="option-1">אפשרות א׳</label><button class="microphone" type="button" data-voice-target="#option-1" data-voice-status="#option-1-status">🎤 הכתבה</button></div>
+              <input id="option-1" class="decision-option" maxlength="140" placeholder="לדוגמה: לפעול עכשיו">
+              <small id="option-1-status" class="option-status">אפשר לכתוב או להכתיב</small>
+            </div>
+            <div class="field option-card" data-option-row="2">
+              <div class="label-row"><label for="option-2">אפשרות ב׳</label><button class="microphone" type="button" data-voice-target="#option-2" data-voice-status="#option-2-status">🎤 הכתבה</button></div>
+              <input id="option-2" class="decision-option" maxlength="140" placeholder="לדוגמה: להמתין">
+              <small id="option-2-status" class="option-status">אפשר לכתוב או להכתיב</small>
+            </div>
+            <div class="field option-card" data-option-row="3" hidden>
+              <div class="label-row"><label for="option-3">אפשרות ג׳</label><span class="option-actions"><button class="microphone" type="button" data-voice-target="#option-3" data-voice-status="#option-3-status">🎤 הכתבה</button><button class="remove-option" type="button" data-remove-option="3">הסר</button></span></div>
+              <input id="option-3" class="decision-option" maxlength="140" placeholder="אפשרות נוספת" disabled>
+              <small id="option-3-status" class="option-status">אפשר לכתוב או להכתיב</small>
+            </div>
+            <div class="field option-card" data-option-row="4" hidden>
+              <div class="label-row"><label for="option-4">אפשרות ד׳</label><span class="option-actions"><button class="microphone" type="button" data-voice-target="#option-4" data-voice-status="#option-4-status">🎤 הכתבה</button><button class="remove-option" type="button" data-remove-option="4">הסר</button></span></div>
+              <input id="option-4" class="decision-option" maxlength="140" placeholder="אפשרות נוספת" disabled>
+              <small id="option-4-status" class="option-status">אפשר לכתוב או להכתיב</small>
+            </div>
+            <div class="field option-card" data-option-row="5" hidden>
+              <div class="label-row"><label for="option-5">אפשרות ה׳</label><span class="option-actions"><button class="microphone" type="button" data-voice-target="#option-5" data-voice-status="#option-5-status">🎤 הכתבה</button><button class="remove-option" type="button" data-remove-option="5">הסר</button></span></div>
+              <input id="option-5" class="decision-option" maxlength="140" placeholder="אפשרות נוספת" disabled>
+              <small id="option-5-status" class="option-status">אפשר לכתוב או להכתיב</small>
+            </div>
           </div>
+          <button type="button" id="add-option" class="add-option-button">＋ הוסף אפשרות</button>
+          <p class="options-help">יש להזין לפחות שתי אפשרויות. ניתן להשוות עד חמש אפשרויות.</p>
 
           <div class="field">
             <label for="considerations">שיקולים חשובים</label>
