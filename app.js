@@ -100,7 +100,7 @@ function renderFiles() {
 
 function initializeDecisionOptions() {
   const addButton = $('#add-option');
-  const rows = $('[data-option-row]');
+  const rows = Array.from(document.querySelectorAll('[data-option-row]'));
   if (!addButton || rows.length < 2) return;
 
   function updateAddButton() {
@@ -121,7 +121,7 @@ function initializeDecisionOptions() {
     updateAddButton();
   });
 
-  $('[data-remove-option]').forEach(button => {
+  Array.from(document.querySelectorAll('[data-remove-option]')).forEach(button => {
     button.addEventListener('click', () => {
       const row = button.closest('[data-option-row]');
       if (!row) return;
