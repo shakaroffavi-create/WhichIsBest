@@ -387,7 +387,7 @@ function collectForm() {
   return {
     category: $('#category').value,
     question: question.value.trim(),
-    options: $('.decision-option').filter(input => !input.disabled).map(input => input.value.trim()).filter(Boolean),
+    options: Array.from(document.querySelectorAll('.decision-option')).filter(input => !input.disabled).map(input => input.value.trim()).filter(Boolean),
     considerations: $('#considerations').value.trim(),
     criteria: collectCriteria(),
     background: background.value.trim(),
