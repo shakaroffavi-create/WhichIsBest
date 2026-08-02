@@ -373,12 +373,16 @@ function initializeCriteriaEditor() {
 
 
 function initializeInlineUpload() {
-  const inlineButton = document.querySelector('#upload-inline-button');
+  const inlineControl = document.querySelector('#upload-inline-button');
   const attachmentsInput = document.querySelector('#attachments');
 
-  if (!inlineButton || !attachmentsInput) return;
+  if (!inlineControl || !attachmentsInput) return;
 
-  inlineButton.addEventListener('click', () => {
+  // A native label linked with for="attachments" is the most reliable
+  // way to open the file picker on iPhone, Android and desktop browsers.
+  if (inlineControl.tagName === 'LABEL') return;
+
+  inlineControl.addEventListener('click', () => {
     attachmentsInput.click();
   });
 }
