@@ -1,9 +1,11 @@
 const { response, promptFrom, parseJson } = require('./_shared.cjs');
+const { enrichWithKnowledge } = require('./_knowledge.cjs');
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return response(200, {});
   try {
     if (!process.env.ANTHROPIC_API_KEY) return response(500,{error:'ANTHROPIC_API_KEY לא מוגדר'});
-    const body = JSON.parse(event.body || '{}');
+    const input = JSON.parse(event.body || '{}');
+    const { body, sources } = await enrichWithKnowledge(input);
     const r = await fetch('https://api.anthropic.com/v1/messages', {
   method: 'POST',
   headers: {
@@ -23,6 +25,6 @@ exports.handler = async (event) => {
   })
 });
     const j = await r.json(); if(!r.ok) throw new Error(j.error?.message || 'Claude error');
-    return response(200,parseJson(j.content?.find(x=>x.type==='text')?.text));
+    return response(200, { ...parseJson(j.content?.find(x=>x.type==='text')?.text), knowledgeSources: sources });
   } catch(e){ return response(500,{error:e.message}); }
 };
