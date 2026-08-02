@@ -361,3 +361,28 @@
 .install-app-button:hover{border-color:#1768e5;color:#1768e5;background:#f4f8ff}
 .install-app-button:focus-visible{outline:3px solid rgba(23,104,229,.25);outline-offset:2px}
 @media(max-width:640px){.topbar-inner{gap:10px}.top-actions{gap:6px}.install-app-button,.top-cta{font-size:11px;padding:8px 9px}.brand{font-size:13px}.brand-mark{width:28px;height:28px}}
+
+
+/* Persistent background guidance and reliable attachment control */
+.field-help{
+  margin:0;
+  color:#415169;
+  font-size:13px;
+  line-height:1.55;
+}
+.attachment-tools{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid #e5ebf2;
+}
+.visually-hidden-file{
+  position:absolute !important;
+  width:1px !important;
+  height:1px !important;
+  padding:0 !important;
+  margin:-1px !important;
+  overflow:hidden !important;
+  clip:rect(0,0,0,0) !important;
+  white-space:nowrap !important;
+  border:0 !important;
+}
