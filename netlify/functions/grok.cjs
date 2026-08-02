@@ -1,4 +1,5 @@
 const { response, promptFrom, parseJson } = require('./_shared.cjs');
+const { enrichWithKnowledge } = require('./_knowledge.cjs');
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return response(200, {});
@@ -7,7 +8,8 @@ exports.handler = async (event) => {
     const apiKey = process.env.XAI_API_KEY;
     if (!apiKey) return response(500, { error: 'XAI_API_KEY לא מוגדר' });
 
-    const body = JSON.parse(event.body || '{}');
+    const input = JSON.parse(event.body || '{}');
+    const { body, sources } = await enrichWithKnowledge(input);
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 55000);
 
@@ -60,7 +62,7 @@ exports.handler = async (event) => {
     const text = String(data?.choices?.[0]?.message?.content || '').trim();
     if (!text) return response(502, { error: 'Grok החזיר תשובה ריקה' });
 
-    return response(200, parseJson(text));
+    return response(200, { ...parseJson(text), knowledgeSources: sources });
   } catch (error) {
     const message = error?.name === 'AbortError'
       ? 'Grok לא השיב בתוך 55 שניות'
