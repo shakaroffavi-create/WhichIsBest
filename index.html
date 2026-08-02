@@ -108,17 +108,19 @@
               <label for="background">תיאור הרקע</label>
               <button id="voice-button" class="microphone" type="button" data-voice-target="#background" data-voice-status="#voice-status">🎤 הכתבה</button>
             </div>
-            <textarea id="background" rows="6" maxlength="2500" placeholder="ספר על המצב הנוכחי, המטרה והפרטים שחשוב להביא בחשבון..."></textarea>
+            <p class="field-help">ספר על המצב הנוכחי, המטרה והפרטים שחשוב להביא בחשבון. ההסבר הזה יישאר כאן גם בזמן ההקלדה.</p>
+            <textarea id="background" rows="6" maxlength="2500" placeholder="כתוב או הכתב כאן את תיאור הרקע..."></textarea>
             <div class="counter"><span id="voice-status">אפשר לכתוב או להכתיב בקול</span><span id="background-count">0/2500</span></div>
+            <div class="question-tools attachment-tools">
+              <input id="attachments" class="visually-hidden-file" type="file" multiple accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,image/*">
+              <button type="button" id="upload-inline-button" class="inline-upload-link">📎 צרף מסמך או תמונה</button>
+              <span>PDF, Word, Excel, PowerPoint או תמונה</span>
+            </div>
           </div>
 
           <div class="field">
             <div class="label-row"><label for="question">השאלה המרכזית</label><button class="microphone" type="button" data-voice-target="#question" data-voice-status="#question-voice-status">🎤 הכתבה</button></div>
             <textarea id="question" rows="4" maxlength="1000" required placeholder="לדוגמה: האם עדיף להיכנס להשקעה עכשיו, להמתין או לפעול בהדרגה?"></textarea>
-            <div class="question-tools">
-              <button type="button" id="upload-inline-button" class="inline-upload-link">📎 צרף מסמך או תמונה</button>
-              <span>PDF, Word, Excel, PowerPoint או תמונה</span>
-            </div>
             <div class="counter"><span id="question-voice-status">משפט אחד ברור מספיק להתחלה</span><span id="question-count">0/1000</span></div>
           </div>
 
@@ -151,7 +153,6 @@
             <button class="context-toggle" id="context-toggle" type="button" aria-expanded="false"><span><b>＋</b><span><strong>הוספת מידע נוסף</strong><small>רקע, מסמכים, תמונה, קישור או הכתבה</small></span></span><em>אופציונלי</em></button>
             <div class="context-body" id="context-body" hidden>
               <div class="upload-zone" id="upload-zone">
-                <input id="attachments" type="file" multiple accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,image/*" hidden>
                 <button type="button" id="upload-button"><span>⇧</span><strong>צרף מסמך או תמונה</strong><small>PDF, Word, Excel, PowerPoint או תמונה</small></button>
                 <div id="file-list" class="file-list"></div>
               </div>
