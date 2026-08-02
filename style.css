@@ -386,3 +386,65 @@
   white-space:nowrap !important;
   border:0 !important;
 }
+
+
+/* Flexible decision options: two required, up to five */
+.options-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.option-card{
+  padding:14px;
+  border:1px solid #dce4ee;
+  border-radius:14px;
+  background:#fbfdff;
+}
+.option-card[hidden]{
+  display:none !important;
+}
+.option-actions{
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+.option-status{
+  color:#6b7a90;
+  font-size:11px;
+}
+.remove-option{
+  border:0;
+  background:transparent;
+  color:#b42334;
+  font-size:11px;
+  font-weight:800;
+  cursor:pointer;
+}
+.add-option-button{
+  width:100%;
+  margin-top:12px;
+  padding:12px 14px;
+  border:1.5px dashed #9db5d1;
+  border-radius:12px;
+  background:#f7faff;
+  color:#1768e5;
+  font-weight:900;
+  cursor:pointer;
+}
+.add-option-button:hover{
+  border-color:#1768e5;
+  background:#eef5ff;
+}
+.add-option-button:disabled{
+  cursor:default;
+  color:#607086;
+  border-color:#d6dee8;
+  background:#f5f7fa;
+}
+.options-help{
+  margin:7px 2px 0;
+  color:#65758b;
+  font-size:12px;
+}
+@media(max-width:640px){
+  .options-grid{grid-template-columns:1fr}
+  .option-card{padding:12px}
+}
