@@ -98,6 +98,48 @@ function renderFiles() {
   $$('[data-remove-file]').forEach(btn => btn.addEventListener('click', () => { selectedFiles.splice(Number(btn.dataset.removeFile), 1); renderFiles(); }));
 }
 
+function initializeDecisionOptions() {
+  const addButton = $('#add-option');
+  const rows = $('[data-option-row]');
+  if (!addButton || rows.length < 2) return;
+
+  function updateAddButton() {
+    const visibleCount = rows.filter(row => !row.hidden).length;
+    addButton.disabled = visibleCount >= 5;
+    addButton.textContent = visibleCount >= 5 ? 'נוספו חמש אפשרויות' : '＋ הוסף אפשרות';
+  }
+
+  addButton.addEventListener('click', () => {
+    const nextRow = rows.find(row => row.hidden);
+    if (!nextRow) return;
+    nextRow.hidden = false;
+    const input = nextRow.querySelector('.decision-option');
+    if (input) {
+      input.disabled = false;
+      input.focus();
+    }
+    updateAddButton();
+  });
+
+  $('[data-remove-option]').forEach(button => {
+    button.addEventListener('click', () => {
+      const row = button.closest('[data-option-row]');
+      if (!row) return;
+      const input = row.querySelector('.decision-option');
+      if (input) {
+        input.value = '';
+        input.disabled = true;
+      }
+      row.hidden = true;
+      updateAddButton();
+    });
+  });
+
+  updateAddButton();
+}
+
+initializeDecisionOptions();
+
 function setupVoice() {
   const buttons = $$('[data-voice-target]');
   if (!buttons.length) return;
@@ -332,17 +374,12 @@ function initializeCriteriaEditor() {
 
 function initializeInlineUpload() {
   const inlineButton = document.querySelector('#upload-inline-button');
-  const attachments = document.querySelector('#attachments');
-  const contextToggle = document.querySelector('#context-toggle');
-  const contextBody = document.querySelector('#context-body');
+  const attachmentsInput = document.querySelector('#attachments');
 
-  if (!inlineButton || !attachments) return;
+  if (!inlineButton || !attachmentsInput) return;
 
   inlineButton.addEventListener('click', () => {
-    if (contextBody?.hidden && contextToggle) {
-      contextToggle.click();
-    }
-    attachments.click();
+    attachmentsInput.click();
   });
 }
 
@@ -350,7 +387,7 @@ function collectForm() {
   return {
     category: $('#category').value,
     question: question.value.trim(),
-    options: [$('#option-a').value.trim(), $('#option-b').value.trim(), $('#option-c').value.trim()].filter(Boolean),
+    options: $('.decision-option').filter(input => !input.disabled).map(input => input.value.trim()).filter(Boolean),
     considerations: $('#considerations').value.trim(),
     criteria: collectCriteria(),
     background: background.value.trim(),
