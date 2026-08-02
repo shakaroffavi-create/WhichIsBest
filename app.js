@@ -841,7 +841,14 @@ function renderResults(decision) {
       ? `<strong>הקריטריונים שלך:</strong> ${criteria.map(item => `<span>${escapeHtml(item.name)} · ${Number(item.weight)}/10</span>`).join('')}`
       : '';
   }
-  const analysisBadge = $('#analysis-badge'); if (analysisBadge) analysisBadge.textContent = safeAnalysis.consensus.providerCount ? `${safeAnalysis.consensus.providerCount} מודלים שולבו` : 'מצב גיבוי';
+  const analysisBadge = $('#analysis-badge');
+  if (analysisBadge) {
+    const modelText = safeAnalysis.consensus.providerCount ? `${safeAnalysis.consensus.providerCount} מודלים שולבו` : 'מצב גיבוי';
+    const sourceNames = new Set((safeAnalysis.providers || []).flatMap(provider =>
+      Array.isArray(provider.parsed?.knowledgeSources) ? provider.parsed.knowledgeSources.map(source => source.file) : []
+    ));
+    analysisBadge.textContent = sourceNames.size ? `${modelText} + מאגר ידע (${sourceNames.size})` : modelText;
+  }
   renderProviders(safeAnalysis.providers || []);
   const rankingList = $('#ranking-list'); if (!rankingList) throw new Error('אזור התוצאות לא נטען');
   rankingList.innerHTML = (safeAnalysis.consensus.ranking || []).map((item,index) => {
