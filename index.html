@@ -52,7 +52,10 @@
         <a href="#memory">הזיכרון שלי</a>
         <a href="#history">היסטוריה</a>
       </nav>
-      <div class="top-actions">\n        <button id="install-app-button" class="install-app-button" type="button">קבל כאפליקציה</button>\n        <a class="top-cta" href="#compare">התחל עכשיו</a>\n      </div>
+      <div class="top-actions">
+        <button id="install-app-button" class="install-app-button" type="button">קבל כאפליקציה</button>
+        <a class="top-cta" href="#compare">התחל עכשיו</a>
+      </div>
     </div>
   </header>
 
@@ -212,7 +215,11 @@
         <div id="provider-strip" class="provider-strip" aria-label="סטטוס המודלים"></div>
         <div id="ranking-list" class="ranking-list"></div>
         <div class="results-note"><strong>מה חשוב לדעת?</strong><p>הדירוג משלב את מודלי ה־AI שהוגדרו ובמידת האפשר גם מידע רלוונטי ממאגר ה־MD האישי, לפי הקטגוריה וההתלבטות. מקור הידע נשמר בצד השרת ואינו תחליף לייעוץ מקצועי.</p></div>
-        <div class="results-actions"><button id="new-comparison" class="button secondary" type="button">התחלה חדשה ונקייה</button><button id="back-to-form" class="button quiet" type="button">עריכת הנתונים</button></div>
+        <div class="results-actions">
+          <button id="new-comparison" class="button secondary" type="button">התחלה חדשה ונקייה</button>
+          <button id="install-app-results" class="install-app-button" type="button">קבל כאפליקציה</button>
+          <button id="back-to-form" class="button quiet" type="button">עריכת הנתונים</button>
+        </div>
       </div>
     </section>
 
@@ -225,7 +232,7 @@
   </main>
 
   <footer><div class="shell footer-inner"><div class="brand"><span class="brand-mark">W</span><span>WICHISBEST</span></div><p>גרסה 5.3 Alpha · קריטריונים ומשקלים</p></div></footer>
-  <script src="app.js?v=5.4.2-reactive-intake"></script>
+  <script src="app.js?v=5.4.3-install-results"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

@@ -1229,7 +1229,7 @@ try { initializeInlineUpload(); } catch (error) { console.warn('Inline upload:',
 
 
 // Installable app experience
-const installAppButton = $('#install-app-button');
+const installAppButtons = $('.install-app-button');
 let deferredInstallPrompt = null;
 
 function isAppInstalled() {
@@ -1241,31 +1241,35 @@ window.addEventListener('beforeinstallprompt', (event) => {
   deferredInstallPrompt = event;
 });
 
-if (installAppButton) {
-  installAppButton.addEventListener('click', async () => {
-    if (isAppInstalled()) {
-      alert('האפליקציה כבר מותקנת במכשיר הזה.');
-      return;
-    }
+async function requestAppInstallation() {
+  if (isAppInstalled()) {
+    alert('האפליקציה כבר מותקנת במכשיר הזה.');
+    return;
+  }
 
-    if (deferredInstallPrompt) {
-      deferredInstallPrompt.prompt();
-      await deferredInstallPrompt.userChoice;
-      deferredInstallPrompt = null;
-      return;
-    }
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    return;
+  }
 
-    const isiPhoneOrIPad = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    if (isiPhoneOrIPad) {
-      alert('להתקנה באייפון: פתח את whichisbest.com ב-Safari, לחץ על סמל השיתוף ובחר ״הוסף למסך הבית״.');
-      return;
-    }
+  const isiPhoneOrIPad = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (isiPhoneOrIPad) {
+    alert('להתקנה באייפון: פתח את whichisbest.com ב-Safari, לחץ על סמל השיתוף ובחר ״הוסף למסך הבית״.');
+    return;
+  }
 
-    alert('פתח את תפריט הדפדפן ובחר ״התקנת WhichIsBest״ או ״הוסף למסך הבית״.');
-  });
+  alert('פתח את תפריט הדפדפן ובחר ״התקנת WhichIsBest״ או ״הוסף למסך הבית״.');
 }
+
+installAppButtons.forEach((button) => {
+  button.addEventListener('click', requestAppInstallation);
+});
 
 window.addEventListener('appinstalled', () => {
   deferredInstallPrompt = null;
-  if (installAppButton) installAppButton.textContent = 'האפליקציה הותקנה';
+  installAppButtons.forEach((button) => {
+    button.textContent = 'האפליקציה הותקנה';
+  });
 });
