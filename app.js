@@ -1190,6 +1190,7 @@ function resetCurrentComparison() {
   form.reset(); resetSmartExtractionState(); selectedFiles=[]; renderFiles(); showMessage(); contextBody.hidden=true; contextPanel.classList.remove('open'); contextToggle.setAttribute('aria-expanded','false'); $('#results').hidden=true; updateCounters(); $('#category').focus(); window.scrollTo({top:$('#compare').offsetTop-70,behavior:'smooth'});
 }
 const newComparisonButton = $('#new-comparison'); if (newComparisonButton) newComparisonButton.addEventListener('click', resetCurrentComparison);
+const topNewComparisonButton = $('#top-new-comparison'); if (topNewComparisonButton) topNewComparisonButton.addEventListener('click', resetCurrentComparison);
 const backToFormButton = $('#back-to-form'); if (backToFormButton) backToFormButton.addEventListener('click',()=>{ const compare = $('#compare'); if (compare) compare.scrollIntoView({behavior:'smooth'}); });
 
 const authDialog=$('#auth-dialog');
