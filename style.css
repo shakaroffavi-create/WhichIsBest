@@ -525,3 +525,15 @@
 @keyframes softSignupIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:640px){.soft-signup{right:16px;bottom:16px;padding:18px;grid-template-columns:34px 1fr}.soft-signup-icon{width:34px;height:34px}.soft-signup-fields{display:grid}.soft-signup-fields button{min-height:44px}}
 @media(prefers-reduced-motion:reduce){.soft-signup{animation:none}}
+
+
+.language-switcher{display:inline-flex;direction:ltr;border:1px solid #d5dfeb;border-radius:10px;padding:2px;background:#f7f9fc;white-space:nowrap}
+.language-switcher button{border:0;background:transparent;color:#66758a;border-radius:7px;padding:6px 8px;font-size:11px;font-weight:800;cursor:pointer}
+.language-switcher button.active{background:#fff;color:#1768e5;box-shadow:0 1px 4px rgba(7,21,43,.12)}
+html[dir="ltr"] .field,html[dir="ltr"] .decision-card,html[dir="ltr"] .workspace-guide,html[dir="ltr"] .soft-signup{text-align:left}
+html[dir="ltr"] .counter,html[dir="ltr"] .label-row,html[dir="ltr"] .card-title,html[dir="ltr"] .results-head{direction:ltr}
+html[dir="ltr"] .soft-signup{right:auto;left:22px}
+html[dir="ltr"] .soft-signup-close{left:auto;right:10px}
+html[dir="ltr"] .soft-signup-copy strong{padding-left:0;padding-right:22px}
+@media(max-width:900px){.language-switcher{margin-inline-start:auto}.topbar-inner{flex-wrap:wrap;height:auto;min-height:68px;padding:8px 0}.top-actions{order:3;width:100%;justify-content:center;padding-bottom:6px}}
+@media(max-width:640px){.language-switcher button{font-size:10px;padding:5px 6px}html[dir="ltr"] .soft-signup{left:16px}}
