@@ -78,6 +78,12 @@ if (background) background.addEventListener('input', () => {
   updateCounters();
   scheduleDecisionExtraction();
 });
+$('#category')?.addEventListener('change', () => {
+  if (background?.value.trim()) {
+    lastExtractedBackground = '';
+    scheduleDecisionExtraction({ immediate: true });
+  }
+});
 
 function fillExtractedOptions(values = []) {
   const options = values.map(value => String(value || '').trim()).filter(Boolean).slice(0, 5);
@@ -88,8 +94,9 @@ function fillExtractedOptions(values = []) {
     if (index < Math.max(2, options.length)) {
       row.hidden = false;
       input.disabled = false;
-      if (options[index]) input.value = options[index];
-    } else if (index >= 2 && !input.value.trim()) {
+      input.value = options[index] || '';
+    } else if (index >= 2) {
+      input.value = '';
       row.hidden = true;
       input.disabled = true;
     }
@@ -136,16 +143,47 @@ function showUnderstanding(data) {
 
 let extractionTimer = null;
 let extractionInFlight = false;
-let automaticExtractionComplete = false;
+let extractionQueued = false;
+let extractionRequestId = 0;
 let lastExtractedBackground = '';
+let pendingExtraction = null;
+
+function resetSmartExtractionState() {
+  clearTimeout(extractionTimer);
+  extractionTimer = null;
+  extractionQueued = false;
+  extractionRequestId += 1;
+  lastExtractedBackground = '';
+  pendingExtraction = null;
+  const panel = $('#understanding-summary');
+  const status = $('#extract-status');
+  if (panel) panel.hidden = true;
+  if (status) {
+    status.textContent = '';
+    status.className = 'extract-status';
+  }
+}
 
 function scheduleDecisionExtraction({ immediate = false } = {}) {
   clearTimeout(extractionTimer);
+  extractionTimer = null;
   const source = background?.value.trim() || '';
-  if (automaticExtractionComplete || extractionInFlight || source.length < 35 || source === lastExtractedBackground) return;
+
+  if (!source) {
+    resetSmartExtractionState();
+    return;
+  }
+  if (source.length < 35 || source === lastExtractedBackground) return;
+  if (extractionInFlight) {
+    extractionQueued = true;
+    return;
+  }
+
+  const panel = $('#understanding-summary');
   const status = $('#extract-status');
+  if (panel) panel.hidden = true;
   if (status) {
-    status.textContent = immediate ? 'ההכתבה הסתיימה — מסדר את ההחלטה…' : 'ממתין לסיום הכתיבה כדי לסדר את ההחלטה אוטומטית…';
+    status.textContent = immediate ? 'ההכתבה הסתיימה — מסדר את ההחלטה מחדש…' : 'ממתין לסיום הכתיבה כדי לעדכן את ההחלטה אוטומטית…';
     status.className = 'extract-status working';
   }
   extractionTimer = setTimeout(() => extractDecisionFromBackground({ automatic: true }), immediate ? 150 : 1800);
@@ -155,7 +193,12 @@ async function extractDecisionFromBackground({ automatic = false, force = false 
   const button = $('#extract-decision');
   const status = $('#extract-status');
   const source = background?.value.trim() || '';
-  if (extractionInFlight || (!force && source === lastExtractedBackground)) return;
+
+  if (extractionInFlight) {
+    extractionQueued = true;
+    return;
+  }
+  if (!force && source === lastExtractedBackground) return;
   if (source.length < 20) {
     if (status) {
       status.textContent = 'כדי שאבין נכון, ספר עוד מעט על הרקע והדילמה.';
@@ -166,14 +209,17 @@ async function extractDecisionFromBackground({ automatic = false, force = false 
   }
 
   extractionInFlight = true;
+  extractionQueued = false;
+  const requestId = ++extractionRequestId;
   clearTimeout(extractionTimer);
+  extractionTimer = null;
   const original = button?.textContent || '✨ סדר לי את ההחלטה';
   if (button) {
     button.disabled = true;
     button.textContent = 'מבין ומסדר…';
   }
   if (status) {
-    status.textContent = 'ה־AI מחלץ את השאלה, החלופות והשיקולים…';
+    status.textContent = 'ה־AI מחלץ מחדש את ההחלטה, החלופות והשיקולים…';
     status.className = 'extract-status working';
   }
 
@@ -186,15 +232,23 @@ async function extractDecisionFromBackground({ automatic = false, force = false 
     }, 30000);
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || 'לא הצלחתי לחלץ את פרטי ההחלטה');
+
+    const currentSource = background?.value.trim() || '';
+    if (requestId !== extractionRequestId || currentSource !== source) {
+      extractionQueued = true;
+      return;
+    }
+
+    pendingExtraction = data;
     showUnderstanding(data);
     lastExtractedBackground = source;
-    automaticExtractionComplete = true;
     if (status) {
       status.textContent = 'סידרתי את ההחלטה. בדוק שהבנתי נכון ואפשר להמשיך.';
       status.className = 'extract-status success';
     }
     if (!automatic) $('#understanding-summary')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   } catch (error) {
+    if (requestId !== extractionRequestId) return;
     if (status) {
       status.textContent = `לא הצלחתי למלא אוטומטית כרגע: ${error.message}. אפשר להמשיך במילוי ידני.`;
       status.className = 'extract-status error';
@@ -206,14 +260,28 @@ async function extractDecisionFromBackground({ automatic = false, force = false 
       button.disabled = false;
       button.textContent = original;
     }
+    const currentSource = background?.value.trim() || '';
+    if (extractionQueued || (currentSource.length >= 35 && currentSource !== lastExtractedBackground)) {
+      extractionQueued = false;
+      scheduleDecisionExtraction({ immediate: false });
+    }
   }
 }
 
 $('#extract-decision')?.addEventListener('click', () => extractDecisionFromBackground({ force: true }));
 $('#confirm-understanding')?.addEventListener('click', () => {
+  if (pendingExtraction) showUnderstanding(pendingExtraction);
+  const status = $('#extract-status');
+  if (status) {
+    status.textContent = 'אושר — ההחלטה, החלופות והשיקולים מולאו וניתנים לעריכה.';
+    status.className = 'extract-status success';
+  }
   $('#options-grid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 });
-$('#edit-understanding')?.addEventListener('click', () => question?.focus());
+$('#edit-understanding')?.addEventListener('click', () => {
+  question?.focus();
+  question?.select();
+});
 
 if (contextToggle) contextToggle.addEventListener('click', () => {
   const open = contextBody.hidden;
@@ -1119,7 +1187,7 @@ if (outcomeForm) {
 }
 
 function resetCurrentComparison() {
-  form.reset(); selectedFiles=[]; renderFiles(); showMessage(); contextBody.hidden=true; contextPanel.classList.remove('open'); contextToggle.setAttribute('aria-expanded','false'); $('#results').hidden=true; updateCounters(); $('#category').focus(); window.scrollTo({top:$('#compare').offsetTop-70,behavior:'smooth'});
+  form.reset(); resetSmartExtractionState(); selectedFiles=[]; renderFiles(); showMessage(); contextBody.hidden=true; contextPanel.classList.remove('open'); contextToggle.setAttribute('aria-expanded','false'); $('#results').hidden=true; updateCounters(); $('#category').focus(); window.scrollTo({top:$('#compare').offsetTop-70,behavior:'smooth'});
 }
 const newComparisonButton = $('#new-comparison'); if (newComparisonButton) newComparisonButton.addEventListener('click', resetCurrentComparison);
 const backToFormButton = $('#back-to-form'); if (backToFormButton) backToFormButton.addEventListener('click',()=>{ const compare = $('#compare'); if (compare) compare.scrollIntoView({behavior:'smooth'}); });
