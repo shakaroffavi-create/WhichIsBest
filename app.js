@@ -7,6 +7,7 @@ const contextBody = $('#context-body');
 const contextPanel = $('#context-panel');
 const question = $('#question');
 const background = $('#background');
+const considerations = $('#considerations');
 const attachments = $('#attachments');
 const fileList = $('#file-list');
 const voiceButton = $('#voice-button');
@@ -74,6 +75,119 @@ function updateCounters() {
 }
 if (question) question.addEventListener('input', updateCounters);
 if (background) background.addEventListener('input', updateCounters);
+
+function fillExtractedOptions(values = []) {
+  const options = values.map(value => String(value || '').trim()).filter(Boolean).slice(0, 5);
+  const rows = Array.from(document.querySelectorAll('[data-option-row]'));
+  rows.forEach((row, index) => {
+    const input = row.querySelector('.decision-option');
+    if (!input) return;
+    if (index < Math.max(2, options.length)) {
+      row.hidden = false;
+      input.disabled = false;
+      if (options[index]) input.value = options[index];
+    } else if (index >= 2 && !input.value.trim()) {
+      row.hidden = true;
+      input.disabled = true;
+    }
+  });
+  const addButton = $('#add-option');
+  if (addButton) {
+    const visibleCount = rows.filter(row => !row.hidden).length;
+    addButton.disabled = visibleCount >= 5;
+    addButton.textContent = visibleCount >= 5 ? 'נוספו חמש אפשרויות' : '＋ הוסף אפשרות';
+  }
+}
+
+function fillExtractedCriteria(values = []) {
+  const names = values.map(value => String(value || '').trim()).filter(Boolean).slice(0, 6);
+  if (!names.length) return;
+  const list = $('#criteria-list');
+  if (!list) return;
+  list.innerHTML = '';
+  names.forEach(name => {
+    const row = criterionRow(name, 5);
+    list.appendChild(row);
+    bindCriterionRow(row);
+  });
+}
+
+function showUnderstanding(data) {
+  if (question) question.value = String(data.question || '').slice(0, 1000);
+  if (considerations) {
+    const items = Array.isArray(data.considerations) ? data.considerations : [];
+    considerations.value = items.join(', ').slice(0, 800);
+    fillExtractedCriteria(items);
+  }
+  fillExtractedOptions(Array.isArray(data.options) ? data.options : []);
+  updateCounters();
+
+  const panel = $('#understanding-summary');
+  const text = $('#understanding-text');
+  if (text) text.textContent = data.summary || [
+    question?.value ? `ההחלטה: ${question.value}` : '',
+    considerations?.value ? `השיקולים: ${considerations.value}` : ''
+  ].filter(Boolean).join(' · ');
+  if (panel) panel.hidden = false;
+}
+
+async function extractDecisionFromBackground() {
+  const button = $('#extract-decision');
+  const status = $('#extract-status');
+  const source = background?.value.trim() || '';
+  if (source.length < 20) {
+    if (status) {
+      status.textContent = 'כדי שאבין נכון, ספר עוד מעט על הרקע והדילמה.';
+      status.className = 'extract-status error';
+    }
+    background?.focus();
+    return;
+  }
+
+  const original = button?.textContent || '✨ סדר לי את ההחלטה';
+  if (button) {
+    button.disabled = true;
+    button.textContent = 'מבין ומסדר…';
+  }
+  if (status) {
+    status.textContent = 'ה־AI מחלץ את השאלה, החלופות והשיקולים…';
+    status.className = 'extract-status working';
+  }
+
+  try {
+    const response = await fetchWithTimeout('/api/extract', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'accept': 'application/json' },
+      cache: 'no-store',
+      body: JSON.stringify({ category: $('#category')?.value || '', background: source })
+    }, 30000);
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'לא הצלחתי לחלץ את פרטי ההחלטה');
+    showUnderstanding(data);
+    if (status) {
+      status.textContent = 'סידרתי את ההחלטה. בדוק שהבנתי נכון ואפשר להמשיך.';
+      status.className = 'extract-status success';
+    }
+    $('#understanding-summary')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } catch (error) {
+    if (status) {
+      status.textContent = `לא הצלחתי למלא אוטומטית כרגע: ${error.message}. אפשר להמשיך במילוי ידני.`;
+      status.className = 'extract-status error';
+    }
+    question?.focus();
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = original;
+    }
+  }
+}
+
+$('#extract-decision')?.addEventListener('click', extractDecisionFromBackground);
+$('#confirm-understanding')?.addEventListener('click', () => {
+  $('#options-grid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+$('#edit-understanding')?.addEventListener('click', () => question?.focus());
 
 if (contextToggle) contextToggle.addEventListener('click', () => {
   const open = contextBody.hidden;
