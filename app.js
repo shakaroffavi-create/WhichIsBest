@@ -1007,6 +1007,7 @@ if (form) form.addEventListener('submit', async (event) => {
 
   try {
     saveLocalHistory(latestDecision);
+    maybeShowSoftSignup();
   } catch (error) {
     console.warn('Local history save skipped', error);
   }
@@ -1022,6 +1023,76 @@ if (form) form.addEventListener('submit', async (event) => {
     submit.disabled = false;
     submit.removeAttribute('aria-busy');
     submit.innerHTML = originalButton;
+  }
+});
+
+
+const signupDismissedKey = 'wichisbest-signup-dismissed-until';
+const signupCompletedKey = 'wichisbest-signup-completed';
+const signupDelayMs = 900;
+
+function hideSoftSignup() {
+  const card = $('#soft-signup');
+  if (card) card.hidden = true;
+}
+
+function deferSoftSignup() {
+  try {
+    localStorage.setItem(signupDismissedKey, String(Date.now() + 30 * 24 * 60 * 60 * 1000));
+  } catch {}
+  hideSoftSignup();
+}
+
+function maybeShowSoftSignup() {
+  try {
+    if (localStorage.getItem(signupCompletedKey) === 'true') return;
+    const dismissedUntil = Number(localStorage.getItem(signupDismissedKey) || 0);
+    if (dismissedUntil > Date.now()) return;
+    const completedDecisions = localGet(historyKey, []).length;
+    if (completedDecisions < 2) return;
+  } catch {
+    return;
+  }
+  window.setTimeout(() => {
+    const card = $('#soft-signup');
+    if (card) card.hidden = false;
+  }, signupDelayMs);
+}
+
+$('#soft-signup-close')?.addEventListener('click', deferSoftSignup);
+$('#soft-signup-later')?.addEventListener('click', deferSoftSignup);
+$('#soft-signup-form')?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const signupForm = event.currentTarget;
+  const status = $('#soft-signup-status');
+  const submitButton = signupForm.querySelector('[type="submit"]');
+  const email = $('#signup-email')?.value.trim() || '';
+  if (!email || !$('#signup-email')?.checkValidity()) {
+    if (status) status.textContent = 'יש להזין כתובת אימייל תקינה.';
+    $('#signup-email')?.focus();
+    return;
+  }
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = 'שומר…';
+  }
+  try {
+    const body = new URLSearchParams(new FormData(signupForm)).toString();
+    const response = await fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body
+    });
+    if (!response.ok) throw new Error('signup_failed');
+    localStorage.setItem(signupCompletedKey, 'true');
+    if (status) status.textContent = 'תודה! ההרשמה נקלטה בהצלחה.';
+    window.setTimeout(hideSoftSignup, 1600);
+  } catch {
+    if (status) status.textContent = 'לא הצלחנו לשמור כרגע. אפשר לנסות שוב מאוחר יותר.';
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = 'שמירת ההחלטות שלי';
+    }
   }
 });
 
