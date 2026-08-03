@@ -23,14 +23,14 @@
     gtag('config', 'G-LHFETJZNJQ');
   </script>
   <title>WICHISBEST 3.0 — משווים. מבינים. מחליטים.</title>
-  <link rel="stylesheet" href="style.css?v=5.3.9-native-file-picker">
+  <link rel="stylesheet" href="style.css?v=5.4.0-smart-intake">
 
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
 (function(){
-  const build='5.3.9-native-file-picker';
+  const build='5.4.0-smart-intake';
   try{
     const previous=localStorage.getItem('wichisbest-build');
     if(previous!==build){
@@ -119,11 +119,27 @@
             </div>
           </div>
 
-          <div class="field">
-            <div class="label-row"><label for="question">השאלה המרכזית</label><button class="microphone" type="button" data-voice-target="#question" data-voice-status="#question-voice-status">🎤 הכתבה</button></div>
-            <textarea id="question" rows="4" maxlength="1000" required placeholder="לדוגמה: האם עדיף להיכנס להשקעה עכשיו, להמתין או לפעול בהדרגה?"></textarea>
-            <div class="counter"><span id="question-voice-status">משפט אחד ברור מספיק להתחלה</span><span id="question-count">0/1000</span></div>
-          </div>
+          <section class="smart-intake" aria-labelledby="smart-intake-title">
+            <div class="smart-intake-head">
+              <div><span class="kicker">AI DECISION SETUP</span><h3 id="smart-intake-title">ספר פעם אחת — ואנחנו נסדר את ההחלטה</h3><p>אחרי כתיבת הרקע, המערכת תחלץ את השאלה, החלופות והשיקולים. הכול ניתן לעריכה לפני שליחה.</p></div>
+              <button id="extract-decision" class="button secondary compact" type="button">✨ סדר לי את ההחלטה</button>
+            </div>
+            <div id="extract-status" class="extract-status" aria-live="polite"></div>
+            <div id="understanding-summary" class="understanding-summary" hidden>
+              <strong>כך הבנתי אותך:</strong>
+              <p id="understanding-text"></p>
+              <div class="understanding-actions"><button id="confirm-understanding" type="button">נכון, המשך</button><button id="edit-understanding" type="button">רוצה לתקן</button></div>
+            </div>
+            <div class="field decision-brief-field">
+              <div class="label-row"><label for="question">מה ההחלטה ומה חשוב לך בבחירה?</label><button class="microphone" type="button" data-voice-target="#question" data-voice-status="#question-voice-status">🎤 הכתבה</button></div>
+              <textarea id="question" rows="4" maxlength="1000" required placeholder="אפשר לתת ל־AI למלא מהתיאור למעלה, או לכתוב כאן ידנית"></textarea>
+              <div class="counter"><span id="question-voice-status">המערכת תמלא כאן תמצית שניתן לתקן</span><span id="question-count">0/1000</span></div>
+            </div>
+            <div class="field extracted-considerations-field">
+              <label for="considerations">השיקולים שהבנתי</label>
+              <textarea id="considerations" rows="3" maxlength="800" placeholder="השיקולים יחולצו אוטומטית מהרקע, וניתן לערוך אותם"></textarea>
+            </div>
+          </section>
 
           <div id="options-grid" class="options-grid">
             <div class="field option-card" data-option-row="1">
@@ -154,12 +170,6 @@
           </div>
           <button type="button" id="add-option" class="add-option-button">＋ הוסף אפשרות</button>
           <p class="options-help">יש להזין לפחות שתי אפשרויות. ניתן להשוות עד חמש אפשרויות.</p>
-
-          <div class="field">
-            <label for="considerations">שיקולים חשובים</label>
-            <textarea id="considerations" rows="3" maxlength="800" placeholder="תקציב, סיכון, זמן, נזילות, משפחה, מיקום או כל מגבלה אחרת"></textarea>
-          </div>
-
 
           <section class="criteria-panel" aria-labelledby="criteria-title">
             <div class="criteria-heading">
@@ -215,7 +225,7 @@
   </main>
 
   <footer><div class="shell footer-inner"><div class="brand"><span class="brand-mark">W</span><span>WICHISBEST</span></div><p>גרסה 5.3 Alpha · קריטריונים ומשקלים</p></div></footer>
-  <script src="app.js?v=5.3.9-native-file-picker"></script>
+  <script src="app.js?v=5.4.0-smart-intake"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
