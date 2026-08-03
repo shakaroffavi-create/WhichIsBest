@@ -23,14 +23,14 @@
     gtag('config', 'G-LHFETJZNJQ');
   </script>
   <title>WICHISBEST 3.0 — משווים. מבינים. מחליטים.</title>
-  <link rel="stylesheet" href="style.css?v=5.4.1-auto-intake">
+  <link rel="stylesheet" href="style.css?v=5.4.6-soft-signup">
 
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
 (function(){
-  const build='5.4.5-top-reset';
+  const build='5.4.6-soft-signup';
   try{
     const previous=localStorage.getItem('wichisbest-build');
     if(previous!==build){
@@ -232,8 +232,28 @@
     </section>
   </main>
 
+  <aside id="soft-signup" class="soft-signup" aria-labelledby="soft-signup-title" hidden>
+    <button id="soft-signup-close" class="soft-signup-close" type="button" aria-label="סגירה">×</button>
+    <div class="soft-signup-icon" aria-hidden="true">✓</div>
+    <div class="soft-signup-copy">
+      <strong id="soft-signup-title">רוצה לשמור את ההחלטות שלך?</strong>
+      <p>בהרשמה קצרה נוכל לחבר בהמשך את ההיסטוריה וההעדפות שלך גם למכשירים נוספים.</p>
+      <form id="soft-signup-form" name="decision-savers" method="POST" data-netlify="true" netlify-honeypot="company">
+        <input type="hidden" name="form-name" value="decision-savers">
+        <p class="signup-trap" hidden><label>אין למלא שדה זה <input name="company"></label></p>
+        <label class="visually-hidden" for="signup-email">כתובת אימייל</label>
+        <div class="soft-signup-fields">
+          <input id="signup-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="כתובת האימייל שלך" required>
+          <button type="submit">שמירת ההחלטות שלי</button>
+        </div>
+        <div id="soft-signup-status" class="soft-signup-status" role="status"></div>
+      </form>
+      <button id="soft-signup-later" class="soft-signup-later" type="button">לא עכשיו — אפשר להמשיך בלי הרשמה</button>
+    </div>
+  </aside>
+
   <footer><div class="shell footer-inner"><div class="brand"><span class="brand-mark">W</span><span>WICHISBEST</span></div><p>גרסה 5.3 Alpha · קריטריונים ומשקלים</p></div></footer>
-  <script src="app.js?v=5.4.5-top-reset"></script>
+  <script src="app.js?v=5.4.6-soft-signup"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
