@@ -30,7 +30,7 @@
 <meta http-equiv="Expires" content="0">
 <script>
 (function(){
-  const build='5.4.4-netlify-refresh';
+  const build='5.4.5-top-reset';
   try{
     const previous=localStorage.getItem('wichisbest-build');
     if(previous!==build){
@@ -53,8 +53,9 @@
         <a href="#history">היסטוריה</a>
       </nav>
       <div class="top-actions">
-        <button id="install-app-button" class="install-app-button" type="button">קבל כאפליקציה</button>
         <a class="top-cta" href="#compare">התחל עכשיו</a>
+        <button id="top-new-comparison" class="top-cta top-reset-button" type="button">התחלה חדשה ונקייה</button>
+        <button id="install-app-button" class="install-app-button" type="button">קבל כאפליקציה</button>
       </div>
     </div>
   </header>
@@ -232,7 +233,7 @@
   </main>
 
   <footer><div class="shell footer-inner"><div class="brand"><span class="brand-mark">W</span><span>WICHISBEST</span></div><p>גרסה 5.3 Alpha · קריטריונים ומשקלים</p></div></footer>
-  <script src="app.js?v=5.4.4-netlify-refresh"></script>
+  <script src="app.js?v=5.4.5-top-reset"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
