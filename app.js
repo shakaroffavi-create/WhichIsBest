@@ -74,7 +74,10 @@ function updateCounters() {
   $('#background-count').textContent = `${background.value.length}/2500`;
 }
 if (question) question.addEventListener('input', updateCounters);
-if (background) background.addEventListener('input', updateCounters);
+if (background) background.addEventListener('input', () => {
+  updateCounters();
+  scheduleDecisionExtraction();
+});
 
 function fillExtractedOptions(values = []) {
   const options = values.map(value => String(value || '').trim()).filter(Boolean).slice(0, 5);
@@ -117,7 +120,7 @@ function showUnderstanding(data) {
   if (considerations) {
     const items = Array.isArray(data.considerations) ? data.considerations : [];
     considerations.value = items.join(', ').slice(0, 800);
-    fillExtractedCriteria(items);
+    fillExtractedCriteria(Array.isArray(data.criteria) && data.criteria.length ? data.criteria : items);
   }
   fillExtractedOptions(Array.isArray(data.options) ? data.options : []);
   updateCounters();
@@ -131,10 +134,28 @@ function showUnderstanding(data) {
   if (panel) panel.hidden = false;
 }
 
-async function extractDecisionFromBackground() {
+let extractionTimer = null;
+let extractionInFlight = false;
+let automaticExtractionComplete = false;
+let lastExtractedBackground = '';
+
+function scheduleDecisionExtraction({ immediate = false } = {}) {
+  clearTimeout(extractionTimer);
+  const source = background?.value.trim() || '';
+  if (automaticExtractionComplete || extractionInFlight || source.length < 35 || source === lastExtractedBackground) return;
+  const status = $('#extract-status');
+  if (status) {
+    status.textContent = immediate ? 'ההכתבה הסתיימה — מסדר את ההחלטה…' : 'ממתין לסיום הכתיבה כדי לסדר את ההחלטה אוטומטית…';
+    status.className = 'extract-status working';
+  }
+  extractionTimer = setTimeout(() => extractDecisionFromBackground({ automatic: true }), immediate ? 150 : 1800);
+}
+
+async function extractDecisionFromBackground({ automatic = false, force = false } = {}) {
   const button = $('#extract-decision');
   const status = $('#extract-status');
   const source = background?.value.trim() || '';
+  if (extractionInFlight || (!force && source === lastExtractedBackground)) return;
   if (source.length < 20) {
     if (status) {
       status.textContent = 'כדי שאבין נכון, ספר עוד מעט על הרקע והדילמה.';
@@ -144,6 +165,8 @@ async function extractDecisionFromBackground() {
     return;
   }
 
+  extractionInFlight = true;
+  clearTimeout(extractionTimer);
   const original = button?.textContent || '✨ סדר לי את ההחלטה';
   if (button) {
     button.disabled = true;
@@ -164,11 +187,13 @@ async function extractDecisionFromBackground() {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || 'לא הצלחתי לחלץ את פרטי ההחלטה');
     showUnderstanding(data);
+    lastExtractedBackground = source;
+    automaticExtractionComplete = true;
     if (status) {
       status.textContent = 'סידרתי את ההחלטה. בדוק שהבנתי נכון ואפשר להמשיך.';
       status.className = 'extract-status success';
     }
-    $('#understanding-summary')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (!automatic) $('#understanding-summary')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   } catch (error) {
     if (status) {
       status.textContent = `לא הצלחתי למלא אוטומטית כרגע: ${error.message}. אפשר להמשיך במילוי ידני.`;
@@ -176,6 +201,7 @@ async function extractDecisionFromBackground() {
     }
     question?.focus();
   } finally {
+    extractionInFlight = false;
     if (button) {
       button.disabled = false;
       button.textContent = original;
@@ -183,7 +209,7 @@ async function extractDecisionFromBackground() {
   }
 }
 
-$('#extract-decision')?.addEventListener('click', extractDecisionFromBackground);
+$('#extract-decision')?.addEventListener('click', () => extractDecisionFromBackground({ force: true }));
 $('#confirm-understanding')?.addEventListener('click', () => {
   $('#options-grid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 });
@@ -351,6 +377,7 @@ function setupVoice() {
       return;
     }
     paintStopped();
+    if (activeTarget === background) scheduleDecisionExtraction({ immediate: true });
   };
 
   recognition.onerror = (event) => {

@@ -24,7 +24,8 @@ exports.handler = async (event) => {
 {
   "question": "שאלה מרכזית קצרה וברורה, כולל מה חשוב בבחירה",
   "options": ["לפחות שתי חלופות ועד חמש"],
-  "considerations": ["עד שישה שיקולים קצרים"],
+  "considerations": ["עד שישה דברים שחשובים למשתמש בבחירה"],
+  "criteria": ["עד שישה מדדי השוואה קצרים ומעשיים המתאימים להחלטה"],
   "summary": "הבנתי שאתה מנסה להחליט בין... לפי השיקולים..."
 }
 אם חסרות חלופות מפורשות, נסח חלופות סבירות רק כאשר הן משתמעות בבירור; אחרת השתמש ב["אפשרות א׳","אפשרות ב׳"] כדי שהמשתמש ישלים.
@@ -51,11 +52,13 @@ ${background}`;
     const parsed = parseJson(json.choices?.[0]?.message?.content);
     const options = cleanArray(parsed.options, 5);
     const considerations = cleanArray(parsed.considerations, 6);
+    const criteria = cleanArray(parsed.criteria, 6);
 
     return response(200, {
       question: String(parsed.question || '').trim().slice(0, 1000),
       options: options.length >= 2 ? options : ['אפשרות א׳', 'אפשרות ב׳'],
       considerations,
+      criteria: criteria.length ? criteria : considerations,
       summary: String(parsed.summary || '').trim().slice(0, 1200)
     });
   } catch (error) {
