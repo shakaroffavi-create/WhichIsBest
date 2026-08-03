@@ -19,6 +19,11 @@
     Cache-Control = "no-store, max-age=0"
 
 [[redirects]]
+  from = "/api/extract"
+  to = "/.netlify/functions/extract"
+  status = 200
+
+[[redirects]]
   from = "/api/analyze"
   to = "/.netlify/functions/analyze"
   status = 200

@@ -477,3 +477,32 @@
   border-color:#a9bed7;
   color:#0b1220;
 }
+
+
+/* v5.4.0 — smart one-time decision intake */
+.smart-intake{
+  margin:18px 0;
+  padding:20px;
+  border:1px solid #cfe0f5;
+  border-radius:18px;
+  background:linear-gradient(145deg,#f7fbff 0%,#fff 72%);
+}
+.smart-intake-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.smart-intake-head h3{margin:4px 0 7px;font-size:1.18rem;color:#07152b}
+.smart-intake-head p{margin:0;color:#415169;line-height:1.65}
+.extract-status{min-height:22px;margin:12px 0 0;font-size:14px;font-weight:700}
+.extract-status.working{color:#1768e5}
+.extract-status.success{color:#078b50}
+.extract-status.error{color:#b42318}
+.understanding-summary{margin:14px 0;padding:16px;border:1px solid #9bd9b9;border-radius:14px;background:#f0fff7}
+.understanding-summary strong{color:#075d38}
+.understanding-summary p{margin:7px 0 12px;color:#0b1220;line-height:1.7;font-weight:600}
+.understanding-actions{display:flex;gap:8px;flex-wrap:wrap}
+.understanding-actions button{border:1px solid #9bb0ca;border-radius:9px;background:#fff;color:#07152b;padding:8px 12px;font-weight:800;cursor:pointer}
+.understanding-actions button:first-child{background:#078b50;border-color:#078b50;color:#fff}
+.decision-brief-field,.extracted-considerations-field{margin-top:16px}
+@media(max-width:640px){
+  .smart-intake{padding:15px}
+  .smart-intake-head{display:block}
+  .smart-intake-head .button{width:100%;margin-top:13px}
+}
