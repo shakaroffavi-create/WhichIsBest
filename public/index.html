@@ -11,13 +11,16 @@
     .results-stage{background:#f4fbfd}.result-shell{width:min(900px,calc(100% - 36px));margin:auto}.result-head{text-align:center;margin-bottom:30px}.result-head small{color:#117a69;font-weight:900;letter-spacing:1.5px}.result-head h1{font-size:clamp(34px,4.3vw,50px);margin:9px 0;color:#000}.result-card{background:white;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}.result-accent{height:4px;background:linear-gradient(90deg,var(--blue),var(--cyan),var(--mint))}.result-content{white-space:pre-wrap;padding:36px;font-size:20px;line-height:1.9;color:#000;font-weight:500;letter-spacing:.01em}.result-tools{padding:18px 24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.tool-group{display:flex;gap:8px}.tool{border:1px solid var(--line);background:white;color:var(--navy);border-radius:8px;padding:10px 13px;font-size:11px;font-weight:800}.tool.primary-tool{background:var(--navy);color:white;border-color:var(--navy)}.disclaimer{font-size:12px;color:#3f5662;text-align:center;margin-top:14px}.history{position:fixed;z-index:70;top:0;bottom:0;left:0;width:min(390px,92vw);background:white;border-right:1px solid var(--line);box-shadow:20px 0 70px rgba(8,48,72,.18);transform:translateX(-105%);transition:.3s;padding:24px;overflow:auto}.history.open{transform:none}.history-top{display:flex;justify-content:space-between;align-items:center}.history-top button{border:0;background:none;font-size:22px}.history-list{display:grid;gap:10px;margin-top:22px}.history-item{border:1px solid var(--line);border-radius:10px;padding:13px;background:#fbfeff}.history-item strong{display:block;font-size:13px}.history-item small{color:var(--muted)}.empty{color:var(--muted);font-size:13px;text-align:center;padding:40px 0}
     @media(max-width:700px){.brand small{display:none}#historyBtn{display:none}.hero{padding-top:45px}.intro h1{font-size:42px}.story-head{align-items:start;flex-direction:column;gap:4px}.story{min-height:310px;font-size:16px}.story-footer{align-items:start;flex-direction:column;gap:13px}.finish{width:100%}.modal-actions{grid-template-columns:1fr}.upload-actions{flex-direction:column-reverse}.upload-actions button{width:100%}.result-content{padding:24px 20px;font-size:18px;line-height:1.85}.result-tools{align-items:stretch;flex-direction:column}.tool-group{display:grid;grid-template-columns:1fr 1fr}.tool{width:100%}}
     .intro p{color:#000;font-size:18px;font-weight:600}
-    #followupModal{align-items:flex-end;padding:18px;background:rgba(10,41,60,.24)}
-    #followupModal .modal{width:min(420px,100%);padding:22px 22px 20px;border-radius:16px;text-align:right;box-shadow:0 18px 55px rgba(6,42,63,.2)}
-    #followupModal .modal-icon{width:42px;height:42px;margin:0;border-radius:12px;font-size:20px}
-    #followupModal h2{font-size:20px;margin:12px 0 5px}
-    #followupModal p{font-size:13px;line-height:1.65;margin-bottom:17px;color:#405b69}
-    #followupModal .modal-actions button{padding:11px 12px;font-size:13px}
-    @media(min-width:701px){#followupModal{justify-content:flex-start}#followupModal .modal{margin:0 24px 18px}}
+    #followupModal{inset:auto 18px 18px auto;width:min(360px,calc(100vw - 24px));height:auto;padding:0;background:transparent;backdrop-filter:none;pointer-events:none;align-items:unset;justify-content:unset}
+    #followupModal.open{display:block}
+    #followupModal .modal{width:100%;padding:16px;border-radius:13px;text-align:right;box-shadow:0 12px 34px rgba(6,42,63,.18);border:1px solid #bfe0e7;pointer-events:auto;animation:sidePop .25s ease}
+    @keyframes sidePop{from{opacity:0;transform:translateY(10px)}}
+    #followupModal .modal-icon{width:30px;height:30px;margin:0;border-radius:9px;font-size:16px;float:right;margin-left:9px}
+    #followupModal h2{font-size:16px;margin:2px 0 7px;line-height:1.4}
+    #followupModal p{clear:both;font-size:12px;line-height:1.55;margin:8px 0 13px;color:#304c5b}
+    #followupModal .modal-actions{grid-template-columns:1.35fr .65fr;gap:7px}
+    #followupModal .modal-actions button{padding:9px 8px;font-size:11px;border-radius:8px}
+    @media(max-width:700px){#followupModal{inset:auto 12px 12px 12px;width:auto}#followupModal .modal{padding:14px}}
   </style>
 </head>
 <body>
@@ -29,7 +32,7 @@
     <section id="resultsStage" class="results-stage"><div class="result-shell"><div class="result-head"><small>הניתוח הושלם</small><h1>תמונת ההחלטה שלך</h1></div><article class="result-card"><div class="result-accent"></div><div id="resultContent" class="result-content"></div><div class="result-tools"><div class="tool-group"><button id="copyBtn" class="tool">העתק תוצאה</button><button id="shareBtn" class="tool">שתף</button></div><div class="tool-group"><button id="saveBtn" class="tool">שמור למעקב</button><button id="againBtn" class="tool primary-tool">התחלה חדשה</button></div></div></article><p class="disclaimer">המערכת מסייעת לחשיבה ולקבלת החלטות ואינה מהווה ייעוץ השקעות, משפטי או מקצועי.</p></div></section>
   </main>
   <div id="attachModal" class="modal-layer" role="dialog" aria-modal="true" aria-labelledby="attachTitle"><div class="modal"><div class="modal-icon">▧</div><h2 id="attachTitle">יש לך חומר שיכול לעזור?</h2><p>אפשר לצרף מסמך, תמונה או צילום מסך. אם אין — נתחיל מיד.</p><div class="modal-actions"><button id="yesAttach" class="yes">כן, אצרף חומר</button><button id="noAttach" class="no">לא, אפשר להתחיל</button></div></div></div>
-  <div id="followupModal" class="modal-layer" role="dialog" aria-modal="true" aria-labelledby="followupTitle"><div class="modal"><div class="modal-icon">＋</div><h2 id="followupTitle">אפשר לדייק עוד</h2><p id="followupSuggestion"></p><div class="modal-actions"><button id="addFollowup" class="yes">צרף חומר רלוונטי</button><button id="skipFollowup" class="no">לא עכשיו</button></div></div></div>
+  <div id="followupModal" class="modal-layer" role="dialog" aria-modal="false" aria-labelledby="followupTitle"><div class="modal"><div class="modal-icon">＋</div><h2 id="followupTitle">עוד פרט אחד יכול לעזור</h2><p id="followupSuggestion"></p><div class="modal-actions"><button id="addFollowup" class="yes">צרף פרט או מסמך</button><button id="skipFollowup" class="no">לא עכשיו</button></div></div></div>
   <aside id="history" class="history"><div class="history-top"><h2>ההחלטות שלי</h2><button id="closeHistory" aria-label="סגור">×</button></div><div id="historyList" class="history-list"></div></aside>
   <script>
     const $=id=>document.getElementById(id);const story=$('story'),finishBtn=$('finishBtn'),micBtn=$('micBtn'),micLabel=$('micLabel'),attachModal=$('attachModal'),followupModal=$('followupModal'),fileInput=$('fileInput'),drop=$('drop'),fileList=$('fileList'),resultContent=$('resultContent');let files=[],recognition=null,listening=false,stepTimer=null,currentResult='',currentSuggestion='';
@@ -62,7 +65,7 @@
       ['#attachTitle','יש לך חומר שיכול לעזור?','Do you have supporting material?'],
       ['#attachModal p','אפשר לצרף מסמך, תמונה או צילום מסך. אם אין — נתחיל מיד.','You can attach a document, image or screenshot. If not, we can start now.'],
       ['#yesAttach','כן, אצרף חומר','Yes, attach material'],['#noAttach','לא, אפשר להתחיל','No, start now'],
-      ['#followupTitle','אפשר לדייק עוד','We can refine this further'],['#addFollowup','צרף חומר רלוונטי','Attach relevant material'],['#skipFollowup','לא עכשיו','Not now'],
+      ['#followupTitle','עוד פרט אחד יכול לעזור','One more detail could help'],['#addFollowup','צרף פרט או מסמך','Add a detail or document'],['#skipFollowup','לא עכשיו','Not now'],
       ['.analysis-stage h2','אנחנו בונים את תמונת ההחלטה שלך','We are building your decision picture'],
       ['.analysis-stage>div>p','זה לוקח כמה רגעים. אנחנו בודקים את הסיפור מכמה זוויות.','This takes a few moments while we examine your story from several angles.'],
       ['.result-head small','הניתוח הושלם','Analysis complete'],['.result-head h1','תמונת ההחלטה שלך','Your decision picture'],
