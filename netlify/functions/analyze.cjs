@@ -1,12 +1,22 @@
 const headers = { 'content-type': 'application/json; charset=utf-8' };
 const reply = (statusCode, body) => ({ statusCode, headers, body: JSON.stringify(body) });
 
-const prompt = (story) => `אתה יועץ החלטות ביקורתי, מאוזן ומעשי. נתח את ההתלבטות הבאה בעברית בהירה.
+const prompt = (story) => `אתה יועץ החלטות ביקורתי, מאוזן ומעשי. השב באותה השפה שבה המשתמש כתב.
 הצג: תמונת מצב, הנחות שחשוב לבדוק, חלופות אפשריות, יתרונות וחסרונות, סיכונים, שאלות המשך, וצעד מעשי ראשון.
 אל תחליט במקום המשתמש ואל תמציא עובדות.
+כתוב טקסט נקי בלבד. אין להשתמש כלל בסימוני Markdown: בלי סולמיות, בלי כוכביות ובלי קווים תחתונים להדגשה. לכותרות השתמש בשורה רגילה, ולרשימות השתמש במקף בלבד.
 
 הסיפור:
 ${story}`;
+
+const clean = (text) => String(text || '')
+  .replace(/^\s*#{1,6}\s*/gm, '')
+  .replace(/\*\*(.*?)\*\*/gs, '$1')
+  .replace(/__(.*?)__/gs, '$1')
+  .replace(/^\s*\*\s+/gm, '- ')
+  .replace(/\*(.*?)\*/gs, '$1')
+  .replace(/^\s*#+\s*/gm, '')
+  .trim();
 
 async function openai(story) {
   const r = await fetch('https://api.openai.com/v1/responses', {
@@ -41,7 +51,7 @@ exports.handler = async (event) => {
     else if (process.env.GEMINI_API_KEY) result = await gemini(story.trim());
     else return reply(500, { error: 'לא הוגדר מפתח OpenAI או Gemini בשרת.' });
     if (!result) throw new Error('לא התקבלה תשובה מהמודל');
-    return reply(200, { result });
+    return reply(200, { result: clean(result) });
   } catch (e) {
     console.error('analyze error', e);
     return reply(500, { error: e.message || 'הניתוח נכשל' });
