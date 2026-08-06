@@ -66,6 +66,38 @@ async function openai(story, attachments = []) {
   return j.output_text || j.output?.flatMap(x => x.content || []).find(x => x.type === 'output_text')?.text;
 }
 
+async function anthropic(story, attachments = []) {
+  const content = [];
+  for (const a of attachments.slice(0, 4)) {
+    const match = String(a.data || '').match(/^data:([^;]+);base64,(.+)$/s);
+    if (String(a.type || '').startsWith('image/') && match) {
+      content.push({ type: 'image', source: { type: 'base64', media_type: match[1], data: match[2] } });
+    } else if (/^(text\/|application\/(json|csv))/.test(a.type || '') || /\.(txt|md|csv)$/i.test(a.name || '')) {
+      const text = attachmentText(a);
+      if (text) content.push({ type: 'text', text: `\nתוכן הקובץ ${a.name || ''}:\n${text}` });
+    } else if ((a.type === 'application/pdf' || /\.pdf$/i.test(a.name || '')) && match) {
+      content.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: match[2] } });
+    }
+  }
+  content.push({ type: 'text', text: prompt(story) });
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-20250514',
+      max_tokens: 1800,
+      messages: [{ role: 'user', content }]
+    })
+  });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error?.message || 'Claude request failed');
+  return j.content?.filter(x => x.type === 'text').map(x => x.text).join('\n');
+}
+
 async function gemini(story) {
   const model = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
   const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
@@ -85,8 +117,9 @@ exports.handler = async (event) => {
     if (!story.trim()) return reply(400, { error: 'לא הוזן סיפור לניתוח' });
     let result;
     if (process.env.OPENAI_API_KEY) result = await openai(story.trim(), attachments);
+    else if (process.env.ANTHROPIC_API_KEY) result = await anthropic(story.trim(), attachments);
     else if (process.env.GEMINI_API_KEY) result = await gemini(story.trim());
-    else return reply(500, { error: 'לא הוגדר מפתח OpenAI או Gemini בשרת.' });
+    else return reply(500, { error: 'לא הוגדר מפתח GPT, Claude או Gemini בשרת.' });
     if (!result) throw new Error('לא התקבלה תשובה מהמודל');
     return reply(200, { result: clean(result), suggestion: suggestionFor(story) });
   } catch (e) {
