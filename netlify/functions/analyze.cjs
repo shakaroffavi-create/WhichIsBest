@@ -113,10 +113,14 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return reply(200, {});
   if (event.httpMethod !== 'POST') return reply(405, { error: 'Method not allowed' });
   try {
-    const { story = '', attachments = [] } = JSON.parse(event.body || '{}');
+    const { story = '', attachments = [], provider = 'auto' } = JSON.parse(event.body || '{}');
     if (!story.trim()) return reply(400, { error: 'לא הוזן סיפור לניתוח' });
     let result;
-    if (process.env.OPENAI_API_KEY) result = await openai(story.trim(), attachments);
+    if (provider === 'claude' && process.env.ANTHROPIC_API_KEY) result = await anthropic(story.trim(), attachments);
+    else if (provider === 'gpt' && process.env.OPENAI_API_KEY) result = await openai(story.trim(), attachments);
+    else if (provider === 'gemini' && process.env.GEMINI_API_KEY) result = await gemini(story.trim());
+    else if (provider !== 'auto') return reply(500, { error: `המנוע ${provider} אינו מוגדר בשרת.` });
+    else if (process.env.OPENAI_API_KEY) result = await openai(story.trim(), attachments);
     else if (process.env.ANTHROPIC_API_KEY) result = await anthropic(story.trim(), attachments);
     else if (process.env.GEMINI_API_KEY) result = await gemini(story.trim());
     else return reply(500, { error: 'לא הוגדר מפתח GPT, Claude או Gemini בשרת.' });
