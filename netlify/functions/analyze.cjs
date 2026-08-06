@@ -20,42 +20,29 @@ const decisionInstructions = `אתה מנוע הכרעה בכיר של WhichIsBe
 5. תקוף את החלופה המובילה כפרקליט השטן.
 6. נסח מסקנה מותנית ובדיקות שיכולות לשנות אותה.
 
-מבנה התשובה המחייב, לפי הסדר ובכותרות המדויקות:
+החזר JSON תקין בלבד, ללא Markdown וללא טקסט לפניו או אחריו. השתמש בדיוק במבנה הבא:
+{
+  "language": "he",
+  "decisionSummary": "2–3 משפטים שמזקקים את ההכרעה",
+  "bottomLine": { "leadingOption": "שם החלופה או לא הוכרעה", "score": null, "confidence": "נמוכה|בינונית|גבוהה", "reason": "הסיבה המרכזית במשפט אחד" },
+  "keyQuestions": ["3–4 שאלות הכרעה"],
+  "knownFacts": ["עובדות בלבד"],
+  "assumptions": ["הנחות שדורשות אימות"],
+  "missingInformation": ["פערים מהותיים בלבד"],
+  "criteria": [{ "name": "קריטריון", "weight": 0, "reason": "מדוע הוא חשוב" }],
+  "options": [{ "name": "חלופה", "score": null, "assessment": "ניתוח ממוקד", "pros": ["עד 3"], "cons": ["עד 2"], "scores": [{ "criterion": "קריטריון", "score": null, "reason": "בסיס הניקוד" }] }],
+  "scenarios": [{ "name": "חיובי|סביר|שלילי", "effect": "כיצד התרחיש משנה את ההעדפה" }],
+  "devilsAdvocate": { "challenge": "הטיעון החזק נגד המובילה", "weakAssumption": "ההנחה החלשה", "blindSpot": "מה אולי מפספסים", "possibleBias": "הטיה אפשרית" },
+  "risks": [{ "risk": "סיכון", "severity": "נמוכה|בינונית|גבוהה", "likelihood": "נמוכה|בינונית|גבוהה|לא ידועה", "mitigation": "בדיקה או צמצום" }],
+  "decisionTriggers": ["אם X אז Y"],
+  "nextActions": ["3–5 פעולות לפי סדר עדיפות"]
+}
 
-דילמת ההכרעה
-2–3 משפטים בלבד: מה ההחלטה, מה המטרה ומהו המתח המרכזי. אין לשקף את כל הסיפור.
-
-שאלות המפתח
-3–4 שאלות הכרעה בלבד. אלה שאלות שהניתוח עונה עליהן, לא שאלון למשתמש.
-
-מה ידוע ומה עדיין לא
-- עובדות שנמסרו או נתמכות בחומר המצורף.
-- הנחות שדורשות אימות.
-- מידע חסר שמשפיע מהותית על ההכרעה.
-אם אין הבדל משמעותי בין הקבוצות, כתוב בקצרה ואל תייצר סעיפים מלאכותיים.
-
-ניתוח החלופות
-השווה את החלופות לפי אותם קריטריונים. לכל חלופה הסבר מה מרוויחים, מה מסכנים, באילו תנאים היא עדיפה, ומה מחיר הטעות או החזרה ממנה. השתמש בנתונים מהפנייה ולא באמירות גנריות.
-
-תרחישים שמשנים את התמונה
-הצג תרחיש חיובי, סביר ושלילי רק כאשר הם רלוונטיים. הסבר איזו חלופה מתחזקת בכל תרחיש ומדוע.
-
-פרקליט השטן
-תקוף את החלופה שנראית מובילה: מהי ההנחה החלשה ביותר, מה המשתמש אולי מפספס, מה יטען מתנגד חכם ואיזו הטיה עלולה להשפיע. אם אין עדיין חלופה מובילה, תקוף את עצם המסגור של הדילמה.
-
-סיכונים שחשוב לראות
-2–4 סיכונים מהותיים בלבד. לכל סיכון ציין מה עלול להשתבש, מה הסבירות או אי-הוודאות הידועה, וכיצד ניתן לבדוק או לצמצם אותו. אל תשתמש באזהרות כלליות.
-
-נקודת ההכרעה
-כתוב מסקנה ברורה ומותנית: אם תנאי א' מתקיים — הכיוון המוביל הוא X; אם תנאי ב' מתקיים — Y. ציין את החלופה המובילה כרגע, רמת הביטחון בה, והנתון היחיד שהכי עשוי לשנות אותה. אם אין בסיס מספיק, אמור זאת במפורש ואל תעמיד פנים שהוכרעה החלטה.
-
-הצעדים הבאים
-3–5 פעולות או בדיקות קונקרטיות לפי סדר עדיפות. הצעד הראשון צריך להיות זה שמצמצם הכי הרבה אי-ודאות ביחס לעלות ולזמן שלו.
-
-כללי הצגה:
-- כתוב טקסט נקי בלבד, בלי Markdown: אין סולמיות, כוכביות, קווים תחתונים או טבלאות Markdown.
-- לכותרות השתמש בשורה רגילה ולרשימות במקף בלבד.
-- העדף עומק ממוקד על פני אורך. אין לחזור על אותה טענה בכמה כותרות.`;
+כללי ניקוד מחייבים:
+- הצג score בין 0 ל-100 רק אם יש בסיס ממשי בפנייה. אחרת החזר null.
+- משקלי הקריטריונים צריכים להסתכם ב-100 רק כאשר יש די מידע; אחרת אפשר להחזיר מערך קריטריונים ללא משקל מהותי באמצעות 0.
+- אין להמציא דיוק מספרי. confidence מתארת את איכות בסיס המידע, לא את מידת השכנוע שלך.
+- שמור כל פריט קצר וממוקד, אך הענק עומק ב-assessment, בפרקליט השטן ובנקודת השינוי.`;
 
 const casePrompt = (story) => `נתח את תיק ההכרעה הבא לפי חוקת WhichIsBest.
 
@@ -82,6 +69,33 @@ const clean = (text) => String(text || '')
   .replace(/\*(.*?)\*/gs, '$1')
   .replace(/^\s*#+\s*/gm, '')
   .trim();
+
+const parseDecision = (text) => {
+  const raw = String(text || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+  try {
+    const value = JSON.parse(raw);
+    if (!value || typeof value !== 'object' || !value.bottomLine || !Array.isArray(value.options)) return null;
+    return value;
+  } catch { return null; }
+};
+
+const decisionToText = (d) => {
+  if (!d) return '';
+  const lines = ['דילמת ההכרעה', d.decisionSummary || '', '', 'נקודת ההכרעה'];
+  const bottom = d.bottomLine || {};
+  lines.push(`החלופה המובילה: ${bottom.leadingOption || 'לא הוכרעה'}`);
+  if (Number.isFinite(bottom.score)) lines.push(`ציון: ${bottom.score}/100`);
+  if (bottom.confidence) lines.push(`רמת ביטחון: ${bottom.confidence}`);
+  if (bottom.reason) lines.push(bottom.reason);
+  if (Array.isArray(d.options) && d.options.length) {
+    lines.push('', 'ניתוח החלופות');
+    for (const option of d.options) lines.push(`${option.name || 'חלופה'}${Number.isFinite(option.score) ? ` — ${option.score}/100` : ''}`, option.assessment || '');
+  }
+  if (d.devilsAdvocate?.challenge) lines.push('', 'פרקליט השטן', d.devilsAdvocate.challenge);
+  if (Array.isArray(d.risks) && d.risks.length) lines.push('', 'סיכונים שחשוב לראות', ...d.risks.map(x => `- ${x.risk}${x.mitigation ? ` — ${x.mitigation}` : ''}`));
+  if (Array.isArray(d.nextActions) && d.nextActions.length) lines.push('', 'הצעדים הבאים', ...d.nextActions.map(x => `- ${x}`));
+  return lines.filter((x, i) => x || lines[i - 1]).join('\n').trim();
+};
 
 const attachmentText = (a) => {
   const match = String(a.data || '').match(/^data:[^;]+;base64,(.+)$/s);
@@ -210,7 +224,8 @@ exports.handler = async (event) => {
     else if (process.env.GEMINI_API_KEY) result = await gemini(story.trim());
     else return reply(500, { error: 'לא הוגדר מפתח GPT, Claude או Gemini בשרת.' });
     if (!result) throw new Error('לא התקבלה תשובה מהמודל');
-    return reply(200, { result: clean(result), suggestion: suggestionFor(story), providers });
+    const decision = parseDecision(result);
+    return reply(200, { decision, result: decision ? decisionToText(decision) : clean(result), suggestion: suggestionFor(story), providers });
   } catch (e) {
     console.error('analyze error', e);
     return reply(500, { error: e.message || 'הניתוח נכשל' });
