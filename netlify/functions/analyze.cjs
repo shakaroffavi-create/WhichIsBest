@@ -160,31 +160,20 @@ async function synthesize(story, analyses) {
   return j.output_text || j.output?.flatMap(x => x.content || []).find(x => x.type === 'output_text')?.text;
 }
 
-async function combined(story, attachments) {
-  const jobs = [];
-  if (process.env.OPENAI_API_KEY) jobs.push({ name: 'GPT', run: () => openai(story, attachments) });
-  if (process.env.ANTHROPIC_API_KEY) jobs.push({ name: 'Claude', run: () => anthropic(story, attachments) });
-  if (process.env.GEMINI_API_KEY) jobs.push({ name: 'Gemini', run: () => gemini(story, attachments) });
-  const settled = await Promise.allSettled(jobs.map(x => x.run()));
-  const analyses = settled.map((x, i) => x.status === 'fulfilled' && x.value ? { name: jobs[i].name, text: clean(x.value) } : null).filter(Boolean);
-  settled.forEach((x, i) => { if (x.status === 'rejected') console.error(`${jobs[i].name} analysis failed`, x.reason); });
-  if (!analyses.length) throw new Error('לא התקבלה תשובה מאף מנוע');
-  if (analyses.length === 1 || !process.env.OPENAI_API_KEY) return { result: analyses[0].text, providers: analyses.map(x => x.name) };
-  return { result: await synthesize(story, analyses), providers: analyses.map(x => x.name) };
-}
-
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return reply(200, {});
   if (event.httpMethod !== 'POST') return reply(405, { error: 'Method not allowed' });
   try {
-    const { story = '', attachments = [], provider = 'combined' } = JSON.parse(event.body || '{}');
+    const { story = '', attachments = [], provider = 'auto', analyses = [] } = JSON.parse(event.body || '{}');
     if (!story.trim()) return reply(400, { error: 'לא הוזן סיפור לניתוח' });
     let result;
     let providers = [];
-    if (provider === 'combined') {
-      const merged = await combined(story.trim(), attachments);
-      result = merged.result;
-      providers = merged.providers;
+    if (provider === 'synthesize') {
+      const valid = analyses.filter(x => x && x.name && x.text).slice(0, 3);
+      if (valid.length < 2) return reply(400, { error: 'נדרשים לפחות שני ניתוחים לצורך שקלול.' });
+      if (!process.env.OPENAI_API_KEY) return reply(500, { error: 'מנוע השקלול אינו מוגדר בשרת.' });
+      result = await synthesize(story.trim(), valid);
+      providers = valid.map(x => x.name);
     }
     else if (provider === 'claude' && process.env.ANTHROPIC_API_KEY) result = await anthropic(story.trim(), attachments);
     else if (provider === 'gpt' && process.env.OPENAI_API_KEY) result = await openai(story.trim(), attachments);
