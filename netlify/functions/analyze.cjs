@@ -98,6 +98,31 @@ async function anthropic(story, attachments = []) {
   return j.content?.filter(x => x.type === 'text').map(x => x.text).join('\n');
 }
 
+async function grok(story, attachments = []) {
+  const content = [{ type: 'input_text', text: prompt(story) }];
+  for (const a of attachments.slice(0, 4)) {
+    if (String(a.type || '').startsWith('image/') && a.data) {
+      content.push({ type: 'input_image', image_url: a.data, detail: 'auto' });
+    } else if (/^(text\/|application\/(json|csv))/.test(a.type || '') || /\.(txt|md|csv)$/i.test(a.name || '')) {
+      const text = attachmentText(a);
+      if (text) content.push({ type: 'input_text', text: `\nתוכן הקובץ ${a.name || ''}:\n${text}` });
+    }
+  }
+  const r = await fetch('https://api.x.ai/v1/responses', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.XAI_API_KEY}` },
+    body: JSON.stringify({
+      model: process.env.XAI_MODEL || 'grok-4.5',
+      input: [{ role: 'user', content }],
+      max_output_tokens: 1800,
+      store: false
+    })
+  });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error?.message || 'Grok request failed');
+  return j.output_text || j.output?.flatMap(x => x.content || []).find(x => x.type === 'output_text')?.text;
+}
+
 async function gemini(story) {
   const model = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
   const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
@@ -119,9 +144,11 @@ exports.handler = async (event) => {
     if (provider === 'claude' && process.env.ANTHROPIC_API_KEY) result = await anthropic(story.trim(), attachments);
     else if (provider === 'gpt' && process.env.OPENAI_API_KEY) result = await openai(story.trim(), attachments);
     else if (provider === 'gemini' && process.env.GEMINI_API_KEY) result = await gemini(story.trim());
+    else if (provider === 'grok' && process.env.XAI_API_KEY) result = await grok(story.trim(), attachments);
     else if (provider !== 'auto') return reply(500, { error: `המנוע ${provider} אינו מוגדר בשרת.` });
     else if (process.env.OPENAI_API_KEY) result = await openai(story.trim(), attachments);
     else if (process.env.ANTHROPIC_API_KEY) result = await anthropic(story.trim(), attachments);
+    else if (process.env.XAI_API_KEY) result = await grok(story.trim(), attachments);
     else if (process.env.GEMINI_API_KEY) result = await gemini(story.trim());
     else return reply(500, { error: 'לא הוגדר מפתח GPT, Claude או Gemini בשרת.' });
     if (!result) throw new Error('לא התקבלה תשובה מהמודל');
