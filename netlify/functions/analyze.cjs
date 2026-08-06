@@ -1,54 +1,72 @@
 const headers = { 'content-type': 'application/json; charset=utf-8' };
 const reply = (statusCode, body) => ({ statusCode, headers, body: JSON.stringify(body) });
 
-const prompt = (story) => `אתה יועץ החלטות ביקורתי, מאוזן ומעשי. השב באותה השפה שבה המשתמש כתב.
+const decisionInstructions = `אתה מנוע הכרעה בכיר של WhichIsBest, לא צ'אט כללי. תפקידך להפוך מידע חלקי ומבולגן לתמונת החלטה ביקורתית, עמוקה ומעשית.
 
-המטרה היא לזקק סיפור מורכב להכרעה ברורה. אין לחזור על כל הסיפור ואין לשקף למשתמש מחדש את כל מה שכתב.
+עקרונות מחייבים:
+- השב בשפת המשתמש ובטון בהיר, ישיר ומכבד.
+- אל תחזור על הסיפור ואל תמלא מקום בהסברים כלליים. כל פסקה חייבת לקדם את ההכרעה.
+- אל תמציא עובדות, מחירים, מסמכים, מקורות או ודאות. הפרד במפורש בין עובדה שנמסרה, מסקנה סבירה, הנחה ומידע חסר.
+- אל תסתפק ברשימת יתרונות וחסרונות. בחן קשרים, תלות בין משתנים, עלות טעות, הפיכות ההחלטה, תמריצים, הטיות ותרחישי קצה סבירים.
+- כאשר קיימות כמה חלופות, השווה אותן לפי אותם מבחנים. כאשר לא הוגדרו חלופות, חלץ את החלופות הסבירות מהפנייה.
+- המלצה חייבת להיות מותנית בנתונים: מה מוביל כרגע, מדוע, מה רמת הביטחון ומה עשוי להפוך את המסקנה.
+- בנושאים מקצועיים או עתירי סיכון, ציין מה דורש אימות אצל בעל מקצוע. אל תציג את הניתוח כתחליף לייעוץ מקצועי.
 
-מבנה התשובה המחייב:
+בצע תחילה, באופן פנימי וללא הצגת תהליך החשיבה, את רצף העבודה הבא:
+1. חלץ את ההחלטה, המטרה, החלופות והאילוצים.
+2. מיין את המידע לעובדות, הנחות, פערים וסתירות.
+3. בחר 3–5 קריטריונים שבאמת מבדילים בין החלופות.
+4. בחן כל חלופה בתרחיש חיובי, סביר ושלילי.
+5. תקוף את החלופה המובילה כפרקליט השטן.
+6. נסח מסקנה מותנית ובדיקות שיכולות לשנות אותה.
 
-תקציר דילמת ההכרעה שלך
-נסח לכל היותר 2–3 משפטים קצרים שמציגים רק את ההחלטה, המטרה והמתח המרכזי בין האפשרויות.
+מבנה התשובה המחייב, לפי הסדר ובכותרות המדויקות:
 
-שאלות המפתח שעולות מהמידע
-הצג 3–4 שאלות בלבד. אלו שאלות ההכרעה המרכזיות שחילצת מהסיפור, ולא שאלון שהמשתמש נדרש להשיב עליו.
+דילמת ההכרעה
+2–3 משפטים בלבד: מה ההחלטה, מה המטרה ומהו המתח המרכזי. אין לשקף את כל הסיפור.
 
-הניתוח
-נתח ישירות את שאלות המפתח. הפרד בין עובדות שנמסרו, הנחות שדורשות אימות ומידע חסר. הצג חלופות, יתרונות וחסרונות, סיכונים ותרחישים רלוונטיים. אל תמציא עובדות.
+שאלות המפתח
+3–4 שאלות הכרעה בלבד. אלה שאלות שהניתוח עונה עליהן, לא שאלון למשתמש.
+
+מה ידוע ומה עדיין לא
+- עובדות שנמסרו או נתמכות בחומר המצורף.
+- הנחות שדורשות אימות.
+- מידע חסר שמשפיע מהותית על ההכרעה.
+אם אין הבדל משמעותי בין הקבוצות, כתוב בקצרה ואל תייצר סעיפים מלאכותיים.
+
+ניתוח החלופות
+השווה את החלופות לפי אותם קריטריונים. לכל חלופה הסבר מה מרוויחים, מה מסכנים, באילו תנאים היא עדיפה, ומה מחיר הטעות או החזרה ממנה. השתמש בנתונים מהפנייה ולא באמירות גנריות.
+
+תרחישים שמשנים את התמונה
+הצג תרחיש חיובי, סביר ושלילי רק כאשר הם רלוונטיים. הסבר איזו חלופה מתחזקת בכל תרחיש ומדוע.
+
+פרקליט השטן
+תקוף את החלופה שנראית מובילה: מהי ההנחה החלשה ביותר, מה המשתמש אולי מפספס, מה יטען מתנגד חכם ואיזו הטיה עלולה להשפיע. אם אין עדיין חלופה מובילה, תקוף את עצם המסגור של הדילמה.
 
 סיכונים שחשוב לראות
-הצג בקצרה 2–4 סיכונים מהותיים בלבד, כולל מה עלול להשתבש ומה דורש אימות לפני החלטה. אם אין מספיק מידע לזיהוי סיכון מסוים, אמור זאת במפורש.
+2–4 סיכונים מהותיים בלבד. לכל סיכון ציין מה עלול להשתבש, מה הסבירות או אי-הוודאות הידועה, וכיצד ניתן לבדוק או לצמצם אותו. אל תשתמש באזהרות כלליות.
+
+נקודת ההכרעה
+כתוב מסקנה ברורה ומותנית: אם תנאי א' מתקיים — הכיוון המוביל הוא X; אם תנאי ב' מתקיים — Y. ציין את החלופה המובילה כרגע, רמת הביטחון בה, והנתון היחיד שהכי עשוי לשנות אותה. אם אין בסיס מספיק, אמור זאת במפורש ואל תעמיד פנים שהוכרעה החלטה.
 
 הצעדים הבאים
-סיים ב-3–5 בדיקות או פעולות מעשיות לפי סדר עדיפות. אל תחליט במקום המשתמש.
+3–5 פעולות או בדיקות קונקרטיות לפי סדר עדיפות. הצעד הראשון צריך להיות זה שמצמצם הכי הרבה אי-ודאות ביחס לעלות ולזמן שלו.
 
-כתוב טקסט נקי בלבד. אין להשתמש כלל בסימוני Markdown: בלי סולמיות, בלי כוכביות ובלי קווים תחתונים להדגשה. לכותרות השתמש בשורה רגילה, ולרשימות השתמש במקף בלבד.
+כללי הצגה:
+- כתוב טקסט נקי בלבד, בלי Markdown: אין סולמיות, כוכביות, קווים תחתונים או טבלאות Markdown.
+- לכותרות השתמש בשורה רגילה ולרשימות במקף בלבד.
+- העדף עומק ממוקד על פני אורך. אין לחזור על אותה טענה בכמה כותרות.`;
 
-הסיפור:
+const casePrompt = (story) => `נתח את תיק ההכרעה הבא לפי חוקת WhichIsBest.
+
+הפנייה המקורית:
 ${story}`;
 
 const synthesisPrompt = (story, analyses) => `אתה עורך ראשי של מערכת לקבלת החלטות. קיבלת ניתוחים עצמאיים ממספר מנועי AI לאותה פנייה.
 
 המטרה שלך היא ליצור תשובה אחת מזוקקת, ביקורתית ומעשית. אין להעתיק את הניתוחים בזה אחר זה ואין לציין שמות של מודלים. מצא נקודות הסכמה, שמור תובנות ייחודיות חשובות, הצג מחלוקות או אי-ודאות מהותיות, והסר כפילויות. אל תמציא עובדות ואל תכריע במקום המשתמש.
 
-מבנה התשובה המחייב:
-
-תקציר דילמת ההכרעה שלך
-2–3 משפטים קצרים בלבד.
-
-שאלות המפתח שעולות מהמידע
-3–4 שאלות הכרעה בלבד.
-
-התמונה המשולבת
-הצג את הניתוח המאוחד. הפרד בין עובדות, הנחות ומידע חסר. ציין במפורש היכן קיימת הסכמה רחבה והיכן יש יותר מאפשרות סבירה אחת.
-
-סיכונים שחשוב לראות
-הצג בקצרה 2–4 סיכונים מהותיים שעלו מהניתוחים, ובפרט סיכונים שיש לגביהם הסכמה רחבה או אי-ודאות משמעותית.
-
-הצעדים הבאים
-3–5 פעולות או בדיקות לפי סדר עדיפות.
-
-כתוב טקסט נקי בלבד, באותה שפה של המשתמש. אין להשתמש בסולמיות, בכוכביות או בקווים תחתונים. לרשימות השתמש במקף בלבד.
+השתמש במבנה התשובה המלא ובכל מבחני העומק של חוקת WhichIsBest. בפרט, שמור על ההפרדה בין עובדות, הנחות ומידע חסר; השווה חלופות באותם קריטריונים; הפעל פרקליט שטן על החלופה המובילה; והצג מסקנה מותנית עם רמת ביטחון ומה עשוי לשנותה.
 
 הפנייה המקורית:
 ${story}
@@ -81,7 +99,7 @@ const suggestionFor = (story) => {
 };
 
 async function openai(story, attachments = []) {
-  const content = [{ type: 'input_text', text: prompt(story) }];
+  const content = [{ type: 'input_text', text: casePrompt(story) }];
   for (const a of attachments.slice(0, 4)) {
     if (String(a.type || '').startsWith('image/') && a.data) content.push({ type: 'input_image', image_url: a.data, detail: 'auto' });
     else if (/^(text\/|application\/(json|csv))/.test(a.type || '') || /\.(txt|md|csv)$/i.test(a.name || '')) {
@@ -91,7 +109,7 @@ async function openai(story, attachments = []) {
   const r = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
-    body: JSON.stringify({ model: process.env.OPENAI_MODEL || 'gpt-4.1', input: [{ role: 'user', content }], max_output_tokens: 1800 })
+    body: JSON.stringify({ model: process.env.OPENAI_MODEL || 'gpt-4.1', instructions: decisionInstructions, input: [{ role: 'user', content }], max_output_tokens: 2600 })
   });
   const j = await r.json();
   if (!r.ok) throw new Error(j.error?.message || 'OpenAI request failed');
@@ -111,7 +129,7 @@ async function anthropic(story, attachments = []) {
       content.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: match[2] } });
     }
   }
-  content.push({ type: 'text', text: prompt(story) });
+  content.push({ type: 'text', text: casePrompt(story) });
   const r = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -121,7 +139,8 @@ async function anthropic(story, attachments = []) {
     },
     body: JSON.stringify({
       model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-5',
-      max_tokens: 1800,
+      system: decisionInstructions,
+      max_tokens: 2600,
       messages: [{ role: 'user', content }]
     })
   });
@@ -132,7 +151,7 @@ async function anthropic(story, attachments = []) {
 
 async function gemini(story, attachments = []) {
   const model = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
-  const parts = [{ text: prompt(story) }];
+  const parts = [{ text: casePrompt(story) }];
   for (const a of attachments.slice(0, 4)) {
     const match = String(a.data || '').match(/^data:([^;]+);base64,(.+)$/s);
     if ((String(a.type || '').startsWith('image/') || a.type === 'application/pdf') && match) {
@@ -144,7 +163,7 @@ async function gemini(story, attachments = []) {
   }
   const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
     method: 'POST', headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ contents: [{ parts }] })
+    body: JSON.stringify({ systemInstruction: { parts: [{ text: decisionInstructions }] }, contents: [{ parts }], generationConfig: { maxOutputTokens: 2600 } })
   });
   const j = await r.json();
   if (!r.ok) throw new Error(j.error?.message || 'Gemini request failed');
@@ -157,8 +176,9 @@ async function synthesize(story, analyses) {
     headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
     body: JSON.stringify({
       model: process.env.OPENAI_MODEL || 'gpt-4.1',
+      instructions: decisionInstructions,
       input: synthesisPrompt(story, analyses),
-      max_output_tokens: 1800
+      max_output_tokens: 2600
     })
   });
   const j = await r.json();
