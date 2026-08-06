@@ -24,6 +24,32 @@ const prompt = (story) => `אתה יועץ החלטות ביקורתי, מאוז
 הסיפור:
 ${story}`;
 
+const synthesisPrompt = (story, analyses) => `אתה עורך ראשי של מערכת לקבלת החלטות. קיבלת ניתוחים עצמאיים ממספר מנועי AI לאותה פנייה.
+
+המטרה שלך היא ליצור תשובה אחת מזוקקת, ביקורתית ומעשית. אין להעתיק את הניתוחים בזה אחר זה ואין לציין שמות של מודלים. מצא נקודות הסכמה, שמור תובנות ייחודיות חשובות, הצג מחלוקות או אי-ודאות מהותיות, והסר כפילויות. אל תמציא עובדות ואל תכריע במקום המשתמש.
+
+מבנה התשובה המחייב:
+
+תקציר דילמת ההכרעה שלך
+2–3 משפטים קצרים בלבד.
+
+שאלות המפתח שעולות מהמידע
+3–4 שאלות הכרעה בלבד.
+
+התמונה המשולבת
+הצג את הניתוח המאוחד. הפרד בין עובדות, הנחות ומידע חסר. ציין במפורש היכן קיימת הסכמה רחבה והיכן יש יותר מאפשרות סבירה אחת.
+
+הצעדים הבאים
+3–5 פעולות או בדיקות לפי סדר עדיפות.
+
+כתוב טקסט נקי בלבד, באותה שפה של המשתמש. אין להשתמש בסולמיות, בכוכביות או בקווים תחתונים. לרשימות השתמש במקף בלבד.
+
+הפנייה המקורית:
+${story}
+
+הניתוחים העצמאיים:
+${analyses.map((x, i) => `\nניתוח ${i + 1}:\n${x.text}`).join('\n')}`;
+
 const clean = (text) => String(text || '')
   .replace(/^\s*#{1,6}\s*/gm, '')
   .replace(/\*\*(.*?)\*\*/gs, '$1')
@@ -98,25 +124,69 @@ async function anthropic(story, attachments = []) {
   return j.content?.filter(x => x.type === 'text').map(x => x.text).join('\n');
 }
 
-async function gemini(story) {
+async function gemini(story, attachments = []) {
   const model = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
+  const parts = [{ text: prompt(story) }];
+  for (const a of attachments.slice(0, 4)) {
+    const match = String(a.data || '').match(/^data:([^;]+);base64,(.+)$/s);
+    if ((String(a.type || '').startsWith('image/') || a.type === 'application/pdf') && match) {
+      parts.push({ inlineData: { mimeType: match[1], data: match[2] } });
+    } else if (/^(text\/|application\/(json|csv))/.test(a.type || '') || /\.(txt|md|csv)$/i.test(a.name || '')) {
+      const text = attachmentText(a);
+      if (text) parts.push({ text: `\nתוכן הקובץ ${a.name || ''}:\n${text}` });
+    }
+  }
   const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
     method: 'POST', headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ contents: [{ parts: [{ text: prompt(story) }] }] })
+    body: JSON.stringify({ contents: [{ parts }] })
   });
   const j = await r.json();
   if (!r.ok) throw new Error(j.error?.message || 'Gemini request failed');
   return j.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('');
 }
 
+async function synthesize(story, analyses) {
+  const r = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
+    body: JSON.stringify({
+      model: process.env.OPENAI_MODEL || 'gpt-4.1',
+      input: synthesisPrompt(story, analyses),
+      max_output_tokens: 1800
+    })
+  });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error?.message || 'Synthesis request failed');
+  return j.output_text || j.output?.flatMap(x => x.content || []).find(x => x.type === 'output_text')?.text;
+}
+
+async function combined(story, attachments) {
+  const jobs = [];
+  if (process.env.OPENAI_API_KEY) jobs.push({ name: 'GPT', run: () => openai(story, attachments) });
+  if (process.env.ANTHROPIC_API_KEY) jobs.push({ name: 'Claude', run: () => anthropic(story, attachments) });
+  if (process.env.GEMINI_API_KEY) jobs.push({ name: 'Gemini', run: () => gemini(story, attachments) });
+  const settled = await Promise.allSettled(jobs.map(x => x.run()));
+  const analyses = settled.map((x, i) => x.status === 'fulfilled' && x.value ? { name: jobs[i].name, text: clean(x.value) } : null).filter(Boolean);
+  settled.forEach((x, i) => { if (x.status === 'rejected') console.error(`${jobs[i].name} analysis failed`, x.reason); });
+  if (!analyses.length) throw new Error('לא התקבלה תשובה מאף מנוע');
+  if (analyses.length === 1 || !process.env.OPENAI_API_KEY) return { result: analyses[0].text, providers: analyses.map(x => x.name) };
+  return { result: await synthesize(story, analyses), providers: analyses.map(x => x.name) };
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return reply(200, {});
   if (event.httpMethod !== 'POST') return reply(405, { error: 'Method not allowed' });
   try {
-    const { story = '', attachments = [], provider = 'auto' } = JSON.parse(event.body || '{}');
+    const { story = '', attachments = [], provider = 'combined' } = JSON.parse(event.body || '{}');
     if (!story.trim()) return reply(400, { error: 'לא הוזן סיפור לניתוח' });
     let result;
-    if (provider === 'claude' && process.env.ANTHROPIC_API_KEY) result = await anthropic(story.trim(), attachments);
+    let providers = [];
+    if (provider === 'combined') {
+      const merged = await combined(story.trim(), attachments);
+      result = merged.result;
+      providers = merged.providers;
+    }
+    else if (provider === 'claude' && process.env.ANTHROPIC_API_KEY) result = await anthropic(story.trim(), attachments);
     else if (provider === 'gpt' && process.env.OPENAI_API_KEY) result = await openai(story.trim(), attachments);
     else if (provider === 'gemini' && process.env.GEMINI_API_KEY) result = await gemini(story.trim());
     else if (provider !== 'auto') return reply(500, { error: `המנוע ${provider} אינו מוגדר בשרת.` });
@@ -125,7 +195,7 @@ exports.handler = async (event) => {
     else if (process.env.GEMINI_API_KEY) result = await gemini(story.trim());
     else return reply(500, { error: 'לא הוגדר מפתח GPT, Claude או Gemini בשרת.' });
     if (!result) throw new Error('לא התקבלה תשובה מהמודל');
-    return reply(200, { result: clean(result), suggestion: suggestionFor(story) });
+    return reply(200, { result: clean(result), suggestion: suggestionFor(story), providers });
   } catch (e) {
     console.error('analyze error', e);
     return reply(500, { error: e.message || 'הניתוח נכשל' });
