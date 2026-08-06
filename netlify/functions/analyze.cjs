@@ -109,7 +109,7 @@ async function openai(story, attachments = []) {
   const r = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
-    body: JSON.stringify({ model: process.env.OPENAI_MODEL || 'gpt-4.1', instructions: decisionInstructions, input: [{ role: 'user', content }], max_output_tokens: 2600 })
+    body: JSON.stringify({ model: process.env.OPENAI_MODEL || 'gpt-4.1', instructions: decisionInstructions, input: [{ role: 'user', content }], max_output_tokens: 1800 })
   });
   const j = await r.json();
   if (!r.ok) throw new Error(j.error?.message || 'OpenAI request failed');
@@ -140,7 +140,7 @@ async function anthropic(story, attachments = []) {
     body: JSON.stringify({
       model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-5',
       system: decisionInstructions,
-      max_tokens: 2600,
+      max_tokens: 1800,
       messages: [{ role: 'user', content }]
     })
   });
@@ -163,7 +163,7 @@ async function gemini(story, attachments = []) {
   }
   const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
     method: 'POST', headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ systemInstruction: { parts: [{ text: decisionInstructions }] }, contents: [{ parts }], generationConfig: { maxOutputTokens: 2600 } })
+    body: JSON.stringify({ systemInstruction: { parts: [{ text: decisionInstructions }] }, contents: [{ parts }], generationConfig: { maxOutputTokens: 1800 } })
   });
   const j = await r.json();
   if (!r.ok) throw new Error(j.error?.message || 'Gemini request failed');
@@ -178,7 +178,7 @@ async function synthesize(story, analyses) {
       model: process.env.OPENAI_MODEL || 'gpt-4.1',
       instructions: decisionInstructions,
       input: synthesisPrompt(story, analyses),
-      max_output_tokens: 2600
+      max_output_tokens: 1800
     })
   });
   const j = await r.json();
