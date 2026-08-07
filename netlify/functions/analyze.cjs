@@ -109,7 +109,7 @@ const suggestionFor = (story) => {
   return 'אם תצרף מסמך, תמונה, צילום מסך או נתונים שקשורים להחלטה, אוכל לחדד את הניתוח ולהפריד טוב יותר בין עובדות, הנחות ומידע חסר.';
 };
 
-async function openai(story, attachments = []) {
+async function openai(story, attachments = [], hasReferenceLinks = false) {
   const content = [{ type: 'input_text', text: casePrompt(story) }];
   for (const a of attachments.slice(0, 4)) {
     if (String(a.type || '').startsWith('image/') && a.data) content.push({ type: 'input_image', image_url: a.data, detail: 'auto' });
@@ -120,7 +120,7 @@ async function openai(story, attachments = []) {
   const r = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
-    body: JSON.stringify({ model: process.env.OPENAI_MODEL || 'gpt-4.1', instructions: decisionInstructions, input: [{ role: 'user', content }], max_output_tokens: 1800 })
+    body: JSON.stringify({ model: process.env.OPENAI_MODEL || 'gpt-4.1', instructions: decisionInstructions, input: [{ role: 'user', content }], ...(hasReferenceLinks ? { tools: [{ type: 'web_search' }], tool_choice: 'auto' } : {}), max_output_tokens: 1800 })
   });
   const j = await r.json();
   if (!r.ok) throw new Error(j.error?.message || 'OpenAI request failed');
@@ -201,8 +201,12 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return reply(200, {});
   if (event.httpMethod !== 'POST') return reply(405, { error: 'Method not allowed' });
   try {
-    const { story = '', attachments = [], provider = 'auto', analyses = [] } = JSON.parse(event.body || '{}');
+    const { story = '', attachments = [], referenceLinks = [], provider = 'auto', analyses = [] } = JSON.parse(event.body || '{}');
     if (!story.trim()) return reply(400, { error: 'לא הוזן סיפור לניתוח' });
+    const links = (Array.isArray(referenceLinks) ? referenceLinks : []).slice(0, 4).map(value => {
+      try { const url = new URL(String(value)); return /^https?:$/.test(url.protocol) ? url.href : ''; } catch { return ''; }
+    }).filter(Boolean);
+    const storyWithLinks = links.length ? `${story.trim()}\n\nקישורים שהמשתמש צירף לבדיקה:\n${links.join('\n')}\nבדוק את תוכן הקישורים ככל שהוא נגיש. אם קישור חסום או לא אומת, ציין זאת ואל תנחש את תוכנו.` : story.trim();
     let result;
     let providers = [];
     if (provider === 'synthesize') {
@@ -212,13 +216,13 @@ exports.handler = async (event) => {
       result = await synthesize(story.trim(), valid);
       providers = valid.map(x => x.name);
     }
-    else if (provider === 'claude' && process.env.ANTHROPIC_API_KEY) result = await anthropic(story.trim(), attachments);
-    else if (provider === 'gpt' && process.env.OPENAI_API_KEY) result = await openai(story.trim(), attachments);
-    else if (provider === 'gemini' && process.env.GEMINI_API_KEY) result = await gemini(story.trim());
+    else if (provider === 'claude' && process.env.ANTHROPIC_API_KEY) result = await anthropic(storyWithLinks, attachments);
+    else if (provider === 'gpt' && process.env.OPENAI_API_KEY) result = await openai(storyWithLinks, attachments, links.length > 0);
+    else if (provider === 'gemini' && process.env.GEMINI_API_KEY) result = await gemini(storyWithLinks, attachments);
     else if (provider !== 'auto') return reply(500, { error: `המנוע ${provider} אינו מוגדר בשרת.` });
-    else if (process.env.OPENAI_API_KEY) result = await openai(story.trim(), attachments);
-    else if (process.env.ANTHROPIC_API_KEY) result = await anthropic(story.trim(), attachments);
-    else if (process.env.GEMINI_API_KEY) result = await gemini(story.trim());
+    else if (process.env.OPENAI_API_KEY) result = await openai(storyWithLinks, attachments, links.length > 0);
+    else if (process.env.ANTHROPIC_API_KEY) result = await anthropic(storyWithLinks, attachments);
+    else if (process.env.GEMINI_API_KEY) result = await gemini(storyWithLinks, attachments);
     else return reply(500, { error: 'לא הוגדר מפתח GPT, Claude או Gemini בשרת.' });
     if (!result) throw new Error('לא התקבלה תשובה מהמודל');
     const decision = parseDecision(result);
