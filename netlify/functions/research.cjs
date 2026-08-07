@@ -8,6 +8,8 @@ const cleanJson = (value) => String(value || '')
   .replace(/^```(?:json)?\s*/i, '')
   .replace(/\s*```$/i, '');
 
+const isPlanningQuery = (text) => /(?:נדל[״"']?ן|נכס|דירה|מגרש|קרקע|תב[״"']?ע|תכנית|תוכנית|תכנוני|גוש|חלקה|היתר\s*בנייה|זכויות\s*בנייה)/i.test(String(text || ''));
+
 function outputText(response) {
   if (response.output_text) return response.output_text;
   return (response.output || [])
@@ -34,7 +36,7 @@ function citedSources(response) {
   return sources.slice(0, 8);
 }
 
-const instructions = `אתה חוקר מקורות רשמיים עבור מנוע קבלת ההחלטות WhichIsBest.
+const generalInstructions = `אתה חוקר מקורות רשמיים עבור מנוע קבלת ההחלטות WhichIsBest.
 בצע מחקר רק כדי לבדוק אם מידע ציבורי עדכני משנה את תמונת ההחלטה הקיימת.
 העדף מקורות ראשוניים ורשמיים: אתרי רגולטורים, בורסות, רשויות, מאגרי דיווח ואתרי קשרי משקיעים. מקור חדשותי משני מותר רק אם אין מקור ראשוני זמין.
 אל תחזור על סיפור המשתמש. אל תיתן הוראות קנייה או מכירה ואל תציג ודאות שאינה קיימת.
@@ -52,6 +54,31 @@ const instructions = `אתה חוקר מקורות רשמיים עבור מנו�
 }
 הצג עד 4 ממצאים בלבד. אם לא נמצא דיווח מהותי, החזר findings ריק וכתוב זאת בבירור.`;
 
+const planningInstructions = `אתה חוקר מידע תכנוני בישראל עבור מנוע קבלת ההחלטות WhichIsBest.
+מטרתך אינה לתאר מחדש את העסקה אלא לבדוק אם מידע תכנוני ציבורי עשוי לשנות את ההחלטה.
+חלץ מהפנייה עיר או יישוב, מספר גוש ומספר חלקה. אם אחד משלושת הפרטים חסר או אינו חד-משמעי, אל תנחש: החזר needsConfirmation=true ושאל רק על הפרט החסר.
+חפש תחילה במקורות רשמיים וציבוריים: מידע תכנוני של מינהל התכנון (mavat.iplan.gov.il), XPLAN/קווים כחולים (ags.iplan.gov.il), מאגר התב״עות של רמ״י (apps.land.gov.il), gov.il, ואתר ההנדסה או GIS של הרשות המקומית המתאימה.
+בדוק ככל שניתן: תוכניות מאושרות, מופקדות ובהכנה; ייעוד קרקע; הוראות וזכויות בנייה; הפקעה או דרך מתוכננת; שימור; התחדשות עירונית; הנחיות מרחביות; בקשות והיתרים היסטוריים.
+אל תטען שמידע לא קיים רק משום שמערכת עירונית חסמה חיפוש או דורשת פעולה ידנית. במקרה כזה ציין במדויק מה לא אומת ובקש קישור, דף מידע, תשריט או צילום מסך.
+הבחן בין עובדה סטטוטורית, תוכנית מוצעת ומסקנה שלך. אין להציג את הבדיקה כתחליף למידע תכנוני רשמי, שמאי, אדריכל או עורך דין.
+אל תחזור על סיפור המשתמש. החזר רק מידע שמשפיע על ההחלטה, בעברית וללא Markdown.
+החזר JSON תקין בלבד:
+{
+  "researchType": "planning",
+  "needsConfirmation": false,
+  "confirmationQuestion": "",
+  "entity": "עיר, גוש וחלקה",
+  "parcel": {"city":"עיר","block":"גוש","parcel":"חלקה"},
+  "checkedAt": "תאריך ושעה",
+  "summary": "עד שני משפטים: מה נמצא ומה לא ניתן היה לאמת",
+  "findings": [{"title":"ממצא קצר","whatChanged":"העובדה התכנונית והסטטוס שלה","decisionImpact":"כיצד היא משפיעה על ההחלטה","materiality":"גבוהה|בינונית|נמוכה","sourceUrl":"קישור ישיר למקור הרשמי"}],
+  "updatedBottomLine": "משפט החלטה אחד בלבד",
+  "unverified": ["פרט שלא ניתן היה לאמת"],
+  "statutoryCaveat": "המידע המקוון הוא כלי סינון ראשוני ואינו מידע סטטוטורי מחייב.",
+  "followUp": "בקשה אחת למסמך או בדיקה שמקדמים את ההחלטה"
+}
+הצג עד 4 ממצאים בלבד. אל תמלא חללים בהשערות.`;
+
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return reply(200, {});
   if (event.httpMethod !== 'POST') return reply(405, { error: 'Method not allowed' });
@@ -63,7 +90,8 @@ exports.handler = async (event) => {
     if (!story) return reply(400, { error: 'לא נמצאה פנייה לבדיקה.' });
 
     const decision = input.decision && typeof input.decision === 'object' ? input.decision : null;
-    const prompt = `בדוק את ההחלטה הבאה מול מידע ציבורי עדכני ורשמי.\n\nהפנייה:\n${story.slice(0, 12000)}\n\nתמונת ההחלטה הקיימת:\n${JSON.stringify(decision || {}).slice(0, 14000)}`;
+    const planning = isPlanningQuery(story);
+    const prompt = `${planning ? 'בצע בדיקת עומק תכנונית לנכס.' : 'בדוק את ההחלטה הבאה מול מידע ציבורי עדכני ורשמי.'}\n\nהפנייה:\n${story.slice(0, 12000)}\n\nתמונת ההחלטה הקיימת:\n${JSON.stringify(decision || {}).slice(0, 14000)}`;
     const response = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
       headers: {
@@ -72,7 +100,7 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         model: process.env.OPENAI_RESEARCH_MODEL || 'gpt-5.5',
-        instructions,
+        instructions: planning ? planningInstructions : generalInstructions,
         input: prompt,
         tools: [{ type: 'web_search' }],
         tool_choice: 'auto',
