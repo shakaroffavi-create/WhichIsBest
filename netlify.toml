@@ -13,6 +13,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/option-fair-value"
+  to = "/.netlify/functions/option-fair-value"
+  status = 200
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
