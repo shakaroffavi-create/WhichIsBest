@@ -111,21 +111,30 @@ function responseSources(response) {
 
 async function preResearch(story) {
   if (!process.env.OPENAI_API_KEY || !needsFreshResearch(story)) return null;
-  const r = await fetch('https://api.openai.com/v1/responses', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
-    body: JSON.stringify({
-      model: process.env.OPENAI_RESEARCH_MODEL || 'gpt-5.5',
-      instructions: `אתה שלב המחקר המקדים של WhichIsBest. חובה לבצע חיפוש אינטרנטי לפני תשובה. אתר קודם את המקור הראשוני והעדכני שאליו הפנייה מתייחסת. בדוחות של חברות ציבוריות חפש תחילה SEC/EDGAR, Investor Relations, 10-Q/10-K/8-K, earnings release או PDF רשמי. אל תסתפק בכתבות. ודא שם ישות, תקופת דיווח ותאריך. חלץ במדויק את הנתונים שהמשתמש ביקש ואת יחידות המדידה והתקופה. אם נשאלו מזומנים, התחייבויות ותזרים חופשי, מצא מספרים מהדוח; אם Free Cash Flow אינו שורה מדווחת, חשב אותו רק כאשר יש בסיס ברור, כגון תזרים מפעילות פחות CapEx, וציין במפורש שזה חישוב. אם המקור הראשוני לא נמצא, כתוב זאת במפורש ואל תנחש. החזר טקסט עובדתי קצר בעברית, כולל שם המקור ותאריך/רבעון, בלי המלצת השקעה.`,
-      input: `זמן הבדיקה: ${new Date().toISOString()}\n\nהשאלה:\n${story.slice(0, 12000)}`,
-      tools: [{ type: 'web_search', search_context_size: 'high' }],
-      tool_choice: 'required',
-      max_output_tokens: 1800
-    })
-  });
-  const j = await r.json();
-  if (!r.ok) throw new Error(j.error?.message || 'מחקר מקדים נכשל');
-  return { text: responseOutputText(j), sources: responseSources(j) };
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+  try {
+    const r = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
+      body: JSON.stringify({
+        model: process.env.OPENAI_RESEARCH_MODEL || process.env.OPENAI_MODEL || 'gpt-4.1',
+        instructions: `אתה שלב המחקר המקדים של WhichIsBest. חובה לבצע חיפוש אינטרנטי. אתר קודם את המקור הראשוני והעדכני שאליו הפנייה מתייחסת. בדוחות של חברות ציבוריות חפש תחילה SEC/EDGAR, Investor Relations, 10-Q/10-K/8-K, earnings release או PDF רשמי. אל תסתפק בכתבות. חלץ רק את הנתונים שהמשתמש ביקש, עם תקופה ויחידות. אם Free Cash Flow אינו שורה מדווחת, חשב אותו רק מבסיס ברור וציין שזה חישוב. אם לא מצאת מקור ראשוני, אל תנחש. החזר טקסט עובדתי קצר בעברית.`,
+        input: `זמן הבדיקה: ${new Date().toISOString()}\n\nהשאלה:\n${story.slice(0, 9000)}`,
+        tools: [{ type: 'web_search' }],
+        tool_choice: 'required',
+        max_output_tokens: 1000
+      })
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error?.message || 'מחקר מקדים נכשל');
+    const text = responseOutputText(j);
+    if (!text) return null;
+    return { text, sources: responseSources(j) };
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 const suggestionFor = (story) => {
@@ -221,6 +230,7 @@ exports.handler = async (event) => {
     let result;
     let providers = [];
     let research = null;
+    let researchFailed = false;
 
     if (provider === 'synthesize') {
       const valid = analyses.filter(x => x && x.name && x.text).slice(0, 3);
@@ -229,15 +239,23 @@ exports.handler = async (event) => {
       result = await synthesize(story.trim(), valid);
       providers = valid.map(x => x.name);
     } else {
-      research = await preResearch(storyWithLinks);
+      try {
+        research = await preResearch(storyWithLinks);
+      } catch (researchError) {
+        researchFailed = true;
+        console.error('preResearch fallback', researchError?.message || researchError);
+        research = null;
+      }
+
       const researchContext = research?.text ? `\n\n=== Research Context — מידע שאותר אוטומטית לפני הניתוח ===\n${research.text}\n\nמקורות שאותרו:\n${(research.sources || []).map(s => `- ${s.title}: ${s.url}`).join('\n')}\n=== סוף Research Context ===\nהשתמש בנתונים האלה בתשובה הראשונה. אם הם נותנים את המספרים שהמשתמש ביקש, אל תכתוב שהמידע חסר.` : '';
       const enrichedStory = `${storyWithLinks}${researchContext}`;
+      const allowMainWebFallback = links.length > 0 || (needsFreshResearch(storyWithLinks) && !research);
 
       if (provider === 'claude' && process.env.ANTHROPIC_API_KEY) result = await anthropic(enrichedStory, attachments);
-      else if (provider === 'gpt' && process.env.OPENAI_API_KEY) result = await openai(enrichedStory, attachments, links.length > 0 || Boolean(research));
+      else if (provider === 'gpt' && process.env.OPENAI_API_KEY) result = await openai(enrichedStory, attachments, allowMainWebFallback);
       else if (provider === 'gemini' && process.env.GEMINI_API_KEY) result = await gemini(enrichedStory, attachments);
       else if (provider !== 'auto') return reply(500, { error: `המנוע ${provider} אינו מוגדר בשרת.` });
-      else if (process.env.OPENAI_API_KEY) result = await openai(enrichedStory, attachments, links.length > 0 || Boolean(research));
+      else if (process.env.OPENAI_API_KEY) result = await openai(enrichedStory, attachments, allowMainWebFallback);
       else if (process.env.ANTHROPIC_API_KEY) result = await anthropic(enrichedStory, attachments);
       else if (process.env.GEMINI_API_KEY) result = await gemini(enrichedStory, attachments);
       else return reply(500, { error: 'לא הוגדר מפתח GPT, Claude או Gemini בשרת.' });
@@ -252,6 +270,7 @@ exports.handler = async (event) => {
       suggestion: suggestionFor(story),
       providers,
       researchUsed: Boolean(research),
+      researchFailed,
       researchSources: research?.sources || []
     });
   } catch (e) {
