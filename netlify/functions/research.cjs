@@ -33,23 +33,60 @@ function citedSources(response) {
       });
     }
   }
-  return sources.slice(0, 8);
+  return sources.slice(0, 10);
 }
 
+function mergeSources(...lists) {
+  const out = [];
+  const seen = new Set();
+  for (const list of lists) {
+    for (const source of list || []) {
+      if (!source?.url || seen.has(source.url)) continue;
+      seen.add(source.url);
+      out.push(source);
+    }
+  }
+  return out.slice(0, 10);
+}
+
+async function callResponses(body) {
+  const response = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+    },
+    body: JSON.stringify(body)
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error?.message || 'מחקר העומק לא הושלם');
+  return data;
+}
+
+const discoveryInstructions = `אתה שלב איתור המקורות של WhichIsBest. אל תנתח את ההחלטה עדיין.
+חובה להשתמש בחיפוש אינטרנטי לפני תשובה.
+המטרה היא לאתר את המקור הראשוני והעדכני ביותר שהמשתמש מתייחס אליו.
+כאשר המשתמש מזכיר "היום", "פורסם", "דוח", "תוצאות", "filing", "הודעה", "earnings", רבעון או אירוע חדש — חפש את הפרסום עצמו ולא רק כתבות עליו.
+העדף לפי הסדר: אתר רשמי/Investor Relations, SEC או רגולטור, בורסה, מאגר דיווח רשמי, PDF רשמי, הודעה רשמית. חדשות הן fallback בלבד.
+בצע כמה שאילתות ממוקדות אם צריך: שם הישות + סוג הפרסום + תאריך/רבעון/שנה + PDF/filing/press release/earnings.
+ודא התאמה של שם הישות, תאריך וסוג המסמך. אל תשתמש במידע ישן כאילו הוא הפרסום החדש.
+אם המקור הראשוני לא נמצא, אמור זאת במפורש.
+החזר JSON תקין בלבד:
+{
+  "entity":"",
+  "publication":"",
+  "publicationDate":"",
+  "primarySourceFound":false,
+  "primarySourceUrl":"",
+  "primarySourceTitle":"",
+  "evidence":["עד 6 עובדות מהמקור או ממקורות מאמתים"],
+  "missing":"מה לא אומת"
+}`;
+
 const generalInstructions = `אתה חוקר מקורות רשמיים עבור מנוע קבלת ההחלטות WhichIsBest.
-
-כלל עבודה מחייב: לפני ניתוח או ניסוח מסקנה, בצע קודם שלב איתור מקורות. אם הפנייה מזכירה אירוע, דוח, הודעה, filing, תוצאות כספיות, החלטה רגולטורית או פרסום מהיום/מהשעות האחרונות/מהימים האחרונים — המשימה הראשונה שלך היא לאתר את הפרסום המקורי והעדכני עצמו.
-
-סדר החיפוש המחייב:
-1. זהה את הישות, סוג הפרסום והתאריך/טווח הזמן מתוך הפנייה.
-2. חפש קודם את המקור הראשוני: אתר החברה או Investor Relations, SEC/EDGAR או רגולטור מתאים, אתר בורסה, רשות ממשלתית, מאגר דיווח רשמי, PDF רשמי או הודעה רשמית.
-3. כאשר מדובר בדוח חדש, נסה שאילתות ממוקדות עם שם הישות + סוג הדוח + התאריך/שנה/רבעון, וחפש גם PDF/filing/earnings release/press release לפי העניין.
-4. אל תסתפק בתוצאת חיפוש, תקציר חדשותי או מידע ישן אם המשתמש מפנה במפורש לפרסום חדש. ודא שמצאת מקור שמתאים לפרסום ולמועד שהוזכרו.
-5. רק לאחר איתור המקור הראשוני קרא את המידע הרלוונטי ונתח את השפעתו על ההחלטה.
-6. מקור חדשותי משני מותר כהשלמה או fallback בלבד. אם המקור הראשוני לא אותר לאחר חיפוש ממוקד, אמור במפורש שלא הצלחת לאמת את הפרסום המקורי ואל תשלים פרטים מהשערה.
-
-בצע מחקר רק כדי לבדוק אם מידע ציבורי עדכני משנה את תמונת ההחלטה הקיימת.
-העדף מקורות ראשוניים ורשמיים: אתרי רגולטורים, בורסות, רשויות, מאגרי דיווח ואתרי קשרי משקיעים. מקור חדשותי משני מותר רק אם אין מקור ראשוני זמין.
+קיבלת תוצאת שלב איתור מקורות שכבר בוצע לפני הניתוח. התייחס אליה כבסיס, אך אמת שוב בחיפוש אם יש ספק או אם חסר פרט מהותי.
+אל תציג מידע שלא אומת. אם שלב האיתור לא מצא את הפרסום הראשוני, ציין זאת במפורש ואל תשלים פרטים מהשערה.
+העדף מקורות ראשוניים ורשמיים: אתרי רגולטורים, בורסות, רשויות, מאגרי דיווח ואתרי קשרי משקיעים. מקור חדשותי משני מותר רק כהשלמה או fallback.
 אל תחזור על סיפור המשתמש. אל תיתן הוראות קנייה או מכירה ואל תציג ודאות שאינה קיימת.
 אם שם הישות אינו חד-משמעי, אל תנחש: החזר needsConfirmation=true ושאלת הבהרה אחת.
 החזר JSON תקין בלבד, בעברית, ללא Markdown:
@@ -58,12 +95,12 @@ const generalInstructions = `אתה חוקר מקורות רשמיים עבור 
   "confirmationQuestion": "",
   "entity": "שם הישות שנבדקה",
   "checkedAt": "תאריך ושעה",
-  "summary": "עד שני משפטים: האם נמצא דבר מהותי שמשנה את ההחלטה",
-  "findings": [{"title":"ממצא קצר","whatChanged":"מה השתנה","decisionImpact":"כיצד זה משפיע על ההחלטה","materiality":"גבוהה|בינונית|נמוכה","sourceUrl":"קישור ישיר"}],
+  "summary": "עד שני משפטים: מה נמצא והאם הוא משנה את ההחלטה",
+  "findings": [{"title":"ממצא קצר","whatChanged":"מה פורסם או השתנה","decisionImpact":"כיצד זה משפיע על ההחלטה","materiality":"גבוהה|בינונית|נמוכה","sourceUrl":"קישור ישיר למקור"}],
   "updatedBottomLine": "משפט אחד בלבד; אם המסקנה לא השתנתה כתוב זאת במפורש",
   "followUp": "שאלה אחת שמקדמת את הדיאלוג"
 }
-הצג עד 4 ממצאים בלבד. אם לא נמצא דיווח מהותי, החזר findings ריק וכתוב זאת בבירור.`;
+הצג עד 4 ממצאים בלבד.`;
 
 const planningInstructions = `אתה חוקר מידע תכנוני בישראל עבור מנוע קבלת ההחלטות WhichIsBest.
 מטרתך אינה לתאר מחדש את העסקה אלא לבדוק אם מידע תכנוני ציבורי עשוי לשנות את ההחלטה.
@@ -106,31 +143,59 @@ exports.handler = async (event) => {
 
     const decision = input.decision && typeof input.decision === 'object' ? input.decision : null;
     const planning = isPlanningQuery(story);
-    const prompt = `${planning ? 'בצע בדיקת עומק תכנונית לנכס.' : 'לפני הניתוח, אתר ואמת את המקור הראשוני העדכני ביותר הרלוונטי לפנייה; לאחר מכן בדוק את ההחלטה מול המידע הציבורי הרשמי שמצאת.'}\n\nהפנייה:\n${story.slice(0, 12000)}\n\nתמונת ההחלטה הקיימת:\n${JSON.stringify(decision || {}).slice(0, 14000)}`;
-    const response = await fetch('https://api.openai.com/v1/responses', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: process.env.OPENAI_RESEARCH_MODEL || 'gpt-5.5',
-        instructions: planning ? planningInstructions : generalInstructions,
+    const model = process.env.OPENAI_RESEARCH_MODEL || 'gpt-5.6';
+    const now = new Date().toISOString();
+
+    if (planning) {
+      const prompt = `בצע בדיקת עומק תכנונית לנכס.\nזמן בדיקה בפועל: ${now}\n\nהפנייה:\n${story.slice(0, 12000)}\n\nתמונת ההחלטה הקיימת:\n${JSON.stringify(decision || {}).slice(0, 14000)}`;
+      const data = await callResponses({
+        model,
+        instructions: planningInstructions,
         input: prompt,
-        tools: [{ type: 'web_search' }],
-        tool_choice: 'auto',
-        max_output_tokens: 1600
-      })
+        tools: [{ type: 'web_search', search_context_size: 'high' }],
+        tool_choice: 'required',
+        reasoning: { effort: 'medium' },
+        max_output_tokens: 2200
+      });
+      let research;
+      try { research = JSON.parse(cleanJson(outputText(data))); }
+      catch { throw new Error('המחקר התקבל במבנה לא תקין. נסה שוב בעוד רגע.'); }
+      const sources = citedSources(data);
+      const findings = Array.isArray(research.findings) ? research.findings.slice(0, 4) : [];
+      for (const finding of findings) if (!finding.sourceUrl && sources[0]?.url) finding.sourceUrl = sources[0].url;
+      return reply(200, { research: { ...research, findings, sources } });
+    }
+
+    const discovery = await callResponses({
+      model,
+      instructions: discoveryInstructions,
+      input: `זמן בדיקה בפועל: ${now}\n\nפניית המשתמש:\n${story.slice(0, 12000)}`,
+      tools: [{ type: 'web_search', search_context_size: 'high' }],
+      tool_choice: 'required',
+      reasoning: { effort: 'medium' },
+      max_output_tokens: 1800
     });
 
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || 'מחקר העומק לא הושלם');
-    const text = outputText(data);
+    const discoveryText = outputText(discovery);
+    const discoverySources = citedSources(discovery);
+
+    const prompt = `נתח את ההחלטה רק לאחר שלב איתור המקורות.\nזמן בדיקה בפועל: ${now}\n\nהפנייה:\n${story.slice(0, 12000)}\n\nתמונת ההחלטה הקיימת:\n${JSON.stringify(decision || {}).slice(0, 14000)}\n\nתוצאת שלב איתור המקורות:\n${discoveryText.slice(0, 10000)}\n\nמקורות שאותרו בשלב הראשון:\n${JSON.stringify(discoverySources).slice(0, 6000)}`;
+
+    const data = await callResponses({
+      model,
+      instructions: generalInstructions,
+      input: prompt,
+      tools: [{ type: 'web_search', search_context_size: 'high' }],
+      tool_choice: 'auto',
+      reasoning: { effort: 'medium' },
+      max_output_tokens: 2200
+    });
+
     let research;
-    try { research = JSON.parse(cleanJson(text)); }
+    try { research = JSON.parse(cleanJson(outputText(data))); }
     catch { throw new Error('המחקר התקבל במבנה לא תקין. נסה שוב בעוד רגע.'); }
 
-    const sources = citedSources(data);
+    const sources = mergeSources(discoverySources, citedSources(data));
     const findings = Array.isArray(research.findings) ? research.findings.slice(0, 4) : [];
     for (const finding of findings) {
       if (!finding.sourceUrl && sources[0]?.url) finding.sourceUrl = sources[0].url;
