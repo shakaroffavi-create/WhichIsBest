@@ -7,6 +7,7 @@ const decisionInstructions = `אתה מנוע הכרעה בכיר של WhichIsBe
 - השב בשפת המשתמש ובטון בהיר, ישיר ומכבד.
 - אל תחזור על הסיפור ואל תמלא מקום בהסברים כלליים. כל פסקה חייבת לקדם את ההכרעה.
 - אל תמציא עובדות, מחירים, מסמכים, מקורות או ודאות. הפרד במפורש בין עובדה שנמסרה, מסקנה סבירה, הנחה ומידע חסר.
+- אם מצורף לפנייה Research Context ממקורות עדכניים, השתמש בו כבסיס עובדתי מרכזי. אל תטען שהנתונים חסרים אם הם מופיעים בו.
 - אל תסתפק ברשימת יתרונות וחסרונות. בחן קשרים, תלות בין משתנים, עלות טעות, הפיכות ההחלטה, תמריצים, הטיות ותרחישי קצה סבירים.
 - כאשר קיימות כמה חלופות, השווה אותן לפי אותם מבחנים. כאשר לא הוגדרו חלופות, חלץ את החלופות הסבירות מהפנייה.
 - המלצה חייבת להיות מותנית בנתונים: מה מוביל כרגע, מדוע, מה רמת הביטחון ומה עשוי להפוך את המסקנה.
@@ -41,22 +42,9 @@ const decisionInstructions = `אתה מנוע הכרעה בכיר של WhichIsBe
 - כתוב את כל הערכים בעברית כאשר הפנייה בעברית. מונח מקצועי באנגלית מותר רק אם אין לו חלופה עברית ברורה.
 - שמור כל פריט קצר וממוקד. עומק נוצר מהבחנה חדה ומהטיעון הנגדי, לא מאורך.`;
 
-const casePrompt = (story) => `נתח את תיק ההכרעה הבא לפי חוקת WhichIsBest.
+const casePrompt = (story) => `נתח את תיק ההכרעה הבא לפי חוקת WhichIsBest.\n\nהפנייה המקורית:\n${story}`;
 
-הפנייה המקורית:
-${story}`;
-
-const synthesisPrompt = (story, analyses) => `אתה עורך ראשי של מערכת לקבלת החלטות. קיבלת ניתוחים עצמאיים ממספר מנועי AI לאותה פנייה.
-
-המטרה שלך היא ליצור תשובה אחת מזוקקת, ביקורתית ומעשית. אין להעתיק את הניתוחים בזה אחר זה ואין לציין שמות של מודלים. מצא נקודות הסכמה, שמור תובנות ייחודיות חשובות, הצג מחלוקות או אי-ודאות מהותיות, והסר כפילויות. אל תמציא עובדות ואל תכריע במקום המשתמש.
-
-השתמש במבנה התשובה המלא ובכל מבחני העומק של חוקת WhichIsBest. בפרט, שמור על ההפרדה בין עובדות, הנחות ומידע חסר; השווה חלופות באותם קריטריונים; הפעל פרקליט שטן על החלופה המובילה; והצג מסקנה מותנית עם רמת ביטחון ומה עשוי לשנותה.
-
-הפנייה המקורית:
-${story}
-
-הניתוחים העצמאיים:
-${analyses.map((x, i) => `\nניתוח ${i + 1}:\n${x.text}`).join('\n')}`;
+const synthesisPrompt = (story, analyses) => `אתה עורך ראשי של מערכת לקבלת החלטות. קיבלת ניתוחים עצמאיים ממספר מנועי AI לאותה פנייה.\n\nהמטרה שלך היא ליצור תשובה אחת מזוקקת, ביקורתית ומעשית. אין להעתיק את הניתוחים בזה אחר זה ואין לציין שמות של מודלים. מצא נקודות הסכמה, שמור תובנות ייחודיות חשובות, הצג מחלוקות או אי-ודאות מהותיות, והסר כפילויות. אל תמציא עובדות ואל תכריע במקום המשתמש.\n\nהשתמש במבנה התשובה המלא ובכל מבחני העומק של חוקת WhichIsBest. בפרט, שמור על ההפרדה בין עובדות, הנחות ומידע חסר; השווה חלופות באותם קריטריונים; הפעל פרקליט שטן על החלופה המובילה; והצג מסקנה מותנית עם רמת ביטחון ומה עשוי לשנותה.\n\nהפנייה המקורית:\n${story}\n\nהניתוחים העצמאיים:\n${analyses.map((x, i) => `\nניתוח ${i + 1}:\n${x.text}`).join('\n')}`;
 
 const clean = (text) => String(text || '')
   .replace(/^\s*#{1,6}\s*/gm, '')
@@ -100,6 +88,46 @@ const attachmentText = (a) => {
   try { return Buffer.from(match[1], 'base64').toString('utf8').slice(0, 30000); } catch { return ''; }
 };
 
+const needsFreshResearch = (story) => /(?:היום|אתמול|פורסם|פורסמו|דוח\s*(?:רבעוני|שנתי)?|דו[״"']?ח|תוצאות\s*(?:רבעון|רבעוניות|כספיות)|רבעון|10[- ]?[QK]|8[- ]?K|filing|earnings|quarterly|annual report|cash flow|תזרים|מזומנים|התחייבויות|מאזן|SEC|EDGAR|Investor Relations)/i.test(String(story || ''));
+
+function responseOutputText(response) {
+  if (response.output_text) return response.output_text;
+  return (response.output || []).flatMap(item => item.content || []).filter(item => item.type === 'output_text').map(item => item.text || '').join('\n');
+}
+
+function responseSources(response) {
+  const sources = [];
+  const seen = new Set();
+  for (const part of (response.output || []).flatMap(item => item.content || [])) {
+    for (const annotation of part.annotations || []) {
+      const url = annotation.url || annotation.url_citation?.url;
+      if (!url || seen.has(url)) continue;
+      seen.add(url);
+      sources.push({ title: annotation.title || annotation.url_citation?.title || url, url });
+    }
+  }
+  return sources.slice(0, 8);
+}
+
+async function preResearch(story) {
+  if (!process.env.OPENAI_API_KEY || !needsFreshResearch(story)) return null;
+  const r = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
+    body: JSON.stringify({
+      model: process.env.OPENAI_RESEARCH_MODEL || 'gpt-5.5',
+      instructions: `אתה שלב המחקר המקדים של WhichIsBest. חובה לבצע חיפוש אינטרנטי לפני תשובה. אתר קודם את המקור הראשוני והעדכני שאליו הפנייה מתייחסת. בדוחות של חברות ציבוריות חפש תחילה SEC/EDGAR, Investor Relations, 10-Q/10-K/8-K, earnings release או PDF רשמי. אל תסתפק בכתבות. ודא שם ישות, תקופת דיווח ותאריך. חלץ במדויק את הנתונים שהמשתמש ביקש ואת יחידות המדידה והתקופה. אם נשאלו מזומנים, התחייבויות ותזרים חופשי, מצא מספרים מהדוח; אם Free Cash Flow אינו שורה מדווחת, חשב אותו רק כאשר יש בסיס ברור, כגון תזרים מפעילות פחות CapEx, וציין במפורש שזה חישוב. אם המקור הראשוני לא נמצא, כתוב זאת במפורש ואל תנחש. החזר טקסט עובדתי קצר בעברית, כולל שם המקור ותאריך/רבעון, בלי המלצת השקעה.`,
+      input: `זמן הבדיקה: ${new Date().toISOString()}\n\nהשאלה:\n${story.slice(0, 12000)}`,
+      tools: [{ type: 'web_search', search_context_size: 'high' }],
+      tool_choice: 'required',
+      max_output_tokens: 1800
+    })
+  });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error?.message || 'מחקר מקדים נכשל');
+  return { text: responseOutputText(j), sources: responseSources(j) };
+}
+
 const suggestionFor = (story) => {
   const s = story.toLowerCase();
   if (/נדל|נכס|דירה|בניין|מגרש|תב.?ע|בנייה|real estate|property/.test(s)) return 'אם תצרף תוכניות, תב״ע, נסח, שומה או מסמכי הנכס הרלוונטיים, אוכל לחדד את הניתוח ולזהות נקודות שדורשות אימות.';
@@ -124,36 +152,23 @@ async function openai(story, attachments = [], hasReferenceLinks = false) {
   });
   const j = await r.json();
   if (!r.ok) throw new Error(j.error?.message || 'OpenAI request failed');
-  return j.output_text || j.output?.flatMap(x => x.content || []).find(x => x.type === 'output_text')?.text;
+  return responseOutputText(j);
 }
 
 async function anthropic(story, attachments = []) {
   const content = [];
   for (const a of attachments.slice(0, 4)) {
     const match = String(a.data || '').match(/^data:([^;]+);base64,(.+)$/s);
-    if (String(a.type || '').startsWith('image/') && match) {
-      content.push({ type: 'image', source: { type: 'base64', media_type: match[1], data: match[2] } });
-    } else if (/^(text\/|application\/(json|csv))/.test(a.type || '') || /\.(txt|md|csv)$/i.test(a.name || '')) {
-      const text = attachmentText(a);
-      if (text) content.push({ type: 'text', text: `\nתוכן הקובץ ${a.name || ''}:\n${text}` });
-    } else if ((a.type === 'application/pdf' || /\.pdf$/i.test(a.name || '')) && match) {
-      content.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: match[2] } });
-    }
+    if (String(a.type || '').startsWith('image/') && match) content.push({ type: 'image', source: { type: 'base64', media_type: match[1], data: match[2] } });
+    else if (/^(text\/|application\/(json|csv))/.test(a.type || '') || /\.(txt|md|csv)$/i.test(a.name || '')) {
+      const text = attachmentText(a); if (text) content.push({ type: 'text', text: `\nתוכן הקובץ ${a.name || ''}:\n${text}` });
+    } else if ((a.type === 'application/pdf' || /\.pdf$/i.test(a.name || '')) && match) content.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: match[2] } });
   }
   content.push({ type: 'text', text: casePrompt(story) });
   const r = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({
-      model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-5',
-      system: decisionInstructions,
-      max_tokens: 1800,
-      messages: [{ role: 'user', content }]
-    })
+    headers: { 'content-type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({ model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-5', system: decisionInstructions, max_tokens: 1800, messages: [{ role: 'user', content }] })
   });
   const j = await r.json();
   if (!r.ok) throw new Error(j.error?.message || 'Claude request failed');
@@ -165,11 +180,9 @@ async function gemini(story, attachments = []) {
   const parts = [{ text: casePrompt(story) }];
   for (const a of attachments.slice(0, 4)) {
     const match = String(a.data || '').match(/^data:([^;]+);base64,(.+)$/s);
-    if ((String(a.type || '').startsWith('image/') || a.type === 'application/pdf') && match) {
-      parts.push({ inlineData: { mimeType: match[1], data: match[2] } });
-    } else if (/^(text\/|application\/(json|csv))/.test(a.type || '') || /\.(txt|md|csv)$/i.test(a.name || '')) {
-      const text = attachmentText(a);
-      if (text) parts.push({ text: `\nתוכן הקובץ ${a.name || ''}:\n${text}` });
+    if ((String(a.type || '').startsWith('image/') || a.type === 'application/pdf') && match) parts.push({ inlineData: { mimeType: match[1], data: match[2] } });
+    else if (/^(text\/|application\/(json|csv))/.test(a.type || '') || /\.(txt|md|csv)$/i.test(a.name || '')) {
+      const text = attachmentText(a); if (text) parts.push({ text: `\nתוכן הקובץ ${a.name || ''}:\n${text}` });
     }
   }
   const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
@@ -185,16 +198,11 @@ async function synthesize(story, analyses) {
   const r = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
-    body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || 'gpt-4.1',
-      instructions: decisionInstructions,
-      input: synthesisPrompt(story, analyses),
-      max_output_tokens: 1800
-    })
+    body: JSON.stringify({ model: process.env.OPENAI_MODEL || 'gpt-4.1', instructions: decisionInstructions, input: synthesisPrompt(story, analyses), max_output_tokens: 1800 })
   });
   const j = await r.json();
   if (!r.ok) throw new Error(j.error?.message || 'Synthesis request failed');
-  return j.output_text || j.output?.flatMap(x => x.content || []).find(x => x.type === 'output_text')?.text;
+  return responseOutputText(j);
 }
 
 exports.handler = async (event) => {
@@ -203,31 +211,49 @@ exports.handler = async (event) => {
   try {
     const { story = '', attachments = [], referenceLinks = [], provider = 'auto', analyses = [] } = JSON.parse(event.body || '{}');
     if (!story.trim()) return reply(400, { error: 'לא הוזן סיפור לניתוח' });
+
     const links = (Array.isArray(referenceLinks) ? referenceLinks : []).slice(0, 4).map(value => {
       try { const url = new URL(String(value)); return /^https?:$/.test(url.protocol) ? url.href : ''; } catch { return ''; }
     }).filter(Boolean);
+
     const storyWithLinks = links.length ? `${story.trim()}\n\nקישורים שהמשתמש צירף לבדיקה:\n${links.join('\n')}\nבדוק את תוכן הקישורים ככל שהוא נגיש. אם קישור חסום או לא אומת, ציין זאת ואל תנחש את תוכנו.` : story.trim();
+
     let result;
     let providers = [];
+    let research = null;
+
     if (provider === 'synthesize') {
       const valid = analyses.filter(x => x && x.name && x.text).slice(0, 3);
       if (valid.length < 2) return reply(400, { error: 'נדרשים לפחות שני ניתוחים לצורך שקלול.' });
       if (!process.env.OPENAI_API_KEY) return reply(500, { error: 'מנוע השקלול אינו מוגדר בשרת.' });
       result = await synthesize(story.trim(), valid);
       providers = valid.map(x => x.name);
+    } else {
+      research = await preResearch(storyWithLinks);
+      const researchContext = research?.text ? `\n\n=== Research Context — מידע שאותר אוטומטית לפני הניתוח ===\n${research.text}\n\nמקורות שאותרו:\n${(research.sources || []).map(s => `- ${s.title}: ${s.url}`).join('\n')}\n=== סוף Research Context ===\nהשתמש בנתונים האלה בתשובה הראשונה. אם הם נותנים את המספרים שהמשתמש ביקש, אל תכתוב שהמידע חסר.` : '';
+      const enrichedStory = `${storyWithLinks}${researchContext}`;
+
+      if (provider === 'claude' && process.env.ANTHROPIC_API_KEY) result = await anthropic(enrichedStory, attachments);
+      else if (provider === 'gpt' && process.env.OPENAI_API_KEY) result = await openai(enrichedStory, attachments, links.length > 0 || Boolean(research));
+      else if (provider === 'gemini' && process.env.GEMINI_API_KEY) result = await gemini(enrichedStory, attachments);
+      else if (provider !== 'auto') return reply(500, { error: `המנוע ${provider} אינו מוגדר בשרת.` });
+      else if (process.env.OPENAI_API_KEY) result = await openai(enrichedStory, attachments, links.length > 0 || Boolean(research));
+      else if (process.env.ANTHROPIC_API_KEY) result = await anthropic(enrichedStory, attachments);
+      else if (process.env.GEMINI_API_KEY) result = await gemini(enrichedStory, attachments);
+      else return reply(500, { error: 'לא הוגדר מפתח GPT, Claude או Gemini בשרת.' });
     }
-    else if (provider === 'claude' && process.env.ANTHROPIC_API_KEY) result = await anthropic(storyWithLinks, attachments);
-    else if (provider === 'gpt' && process.env.OPENAI_API_KEY) result = await openai(storyWithLinks, attachments, links.length > 0);
-    else if (provider === 'gemini' && process.env.GEMINI_API_KEY) result = await gemini(storyWithLinks, attachments);
-    else if (provider !== 'auto') return reply(500, { error: `המנוע ${provider} אינו מוגדר בשרת.` });
-    else if (process.env.OPENAI_API_KEY) result = await openai(storyWithLinks, attachments, links.length > 0);
-    else if (process.env.ANTHROPIC_API_KEY) result = await anthropic(storyWithLinks, attachments);
-    else if (process.env.GEMINI_API_KEY) result = await gemini(storyWithLinks, attachments);
-    else return reply(500, { error: 'לא הוגדר מפתח GPT, Claude או Gemini בשרת.' });
+
     if (!result) throw new Error('לא התקבלה תשובה מהמודל');
     const decision = parseDecision(result);
     if (!decision && /^\s*[{[]/.test(String(result))) throw new Error('מבנה הניתוח לא הושלם. נסה שוב בעוד רגע.');
-    return reply(200, { decision, result: decision ? decisionToText(decision) : clean(result), suggestion: suggestionFor(story), providers });
+    return reply(200, {
+      decision,
+      result: decision ? decisionToText(decision) : clean(result),
+      suggestion: suggestionFor(story),
+      providers,
+      researchUsed: Boolean(research),
+      researchSources: research?.sources || []
+    });
   } catch (e) {
     console.error('analyze error', e);
     return reply(500, { error: e.message || 'הניתוח נכשל' });
