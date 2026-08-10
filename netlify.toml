@@ -13,6 +13,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/dealdesk"
+  to = "/.netlify/functions/dealdesk"
+  status = 200
+
+[[redirects]]
   from = "/api/option-fair-value"
   to = "/.netlify/functions/option-fair-value"
   status = 200
