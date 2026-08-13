@@ -79,4 +79,7 @@
     $('downloadGenerated').onclick=()=>{if(!generatedDocument)return;const blob=new Blob([generatedDocument.content],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=(generatedDocument.title||'מסמך המשך').replace(/[\\/:*?"<>|]/g,'-')+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
     $('saveOutcome').onclick=()=>{if(!latest.length)return;const caseName=$('caseName').value.trim()||'תיק ללא שם',items=getOutcomes(),existing=items.find(x=>x.caseName===caseName),item={id:existing?.id||String(Date.now()),caseName,selectedOption:$('outcomeWinner').value,finalPrice:num($('outcomePrice').value),budgetStatus:$('outcomeBudget').value,scheduleStatus:$('outcomeSchedule').value,satisfaction:$('outcomeSatisfaction').value,benchmarkConsent:$('benchmarkConsent').checked,storedLocally:true,updatedAt:new Date().toISOString()};setOutcomes([item,...items.filter(x=>x.id!==item.id)]);$('outcomeStatus').textContent='התוצאה נשמרה במכשיר הזה. לא נשלחו נתונים למאגר מרכזי.'};
   </script>
+  <link rel="stylesheet" href="/tender-upgrade.css">
+  <script src="/tender-engine.js"></script>
+  <script src="/tender-upgrade.js"></script>
 </body></html>
