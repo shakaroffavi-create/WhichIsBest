@@ -87,7 +87,25 @@
     const nativeFetch=window.fetch.bind(window);
     window.fetch=async(...args)=>{const response=await nativeFetch(...args),url=String(args[0]||'');if(url.includes('dealdesk-extract')&&response.ok)response.clone().json().then(renderTenderFindings).catch(()=>{});return response};
   }
-  focusProduct();injectBuilder();injectMatrix();configureHeroActions();injectTenderUpload();configureTenderStages();observeExtraction();
+  function resetTenderDraft(){
+    boq=[];mode='request';extractedTenderData=null;
+    const all=JSON.parse(localStorage.getItem(REQ_KEY)||'{}');delete all.draft;localStorage.setItem(REQ_KEY,JSON.stringify(all));
+    ['clientName','projectLocation','tenderDeadline','tenderRequirements'].forEach(id=>{if($(id))$(id).value=''});
+    if($('tenderVisibility'))$('tenderVisibility').value='private';
+    if($('tenderFile'))$('tenderFile').value='';
+    if($('tenderFileStatus')){$('tenderFileStatus').textContent='טרם הועלה מסמך';$('tenderFileStatus').className=''}
+    $('tenderFindings')?.remove();$('tenderReadiness')?.remove();$('emailDrafts')?.remove();
+    renderBoq();renderMatrix();
+    document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x.dataset.mode==='request'));
+    const builder=$('tenderBuilder'),toolbar=builder?.querySelector('.boq-toolbar');
+    if(builder)builder.querySelector('h4').textContent='דרישת המכרז - נקודת הייחוס';
+    if(toolbar)toolbar.hidden=true;if($('boqList'))$('boqList').hidden=true;
+    [$('budget'),$('priority')].forEach(field=>{if(field?.closest('.field'))field.closest('.field').hidden=true});
+  }
+  function bindCleanStart(){
+    [$('newCase'),$('dashNewCase')].filter(Boolean).forEach(button=>button.addEventListener('click',()=>setTimeout(resetTenderDraft,0)));
+  }
+  focusProduct();injectBuilder();injectMatrix();configureHeroActions();injectTenderUpload();configureTenderStages();observeExtraction();bindCleanStart();
   const originalShow=showPanel;showPanel=function(n){originalShow(n);if(Number(n)===3)setTimeout(renderMatrix,0)};
   const originalAnalyze=$('analyze').onclick;$('analyze').onclick=async()=>{saveRequest();await originalAnalyze();enhanceResult()};
   const originalOpen=openSavedCase;openSavedCase=function(id){originalOpen(id);loadRequest();setTimeout(()=>{renderMatrix();enhanceResult()},0)};
