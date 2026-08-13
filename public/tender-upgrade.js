@@ -13,7 +13,27 @@
   function offerData(){const suppliers=currentSuppliers();return suppliers.map((supplier,i)=>({supplier,lines:boq.map(req=>({requirementId:req.id,unitPrice:Number(document.querySelector(`[data-req="${CSS.escape(req.id)}"] [data-supplier="${i}"]`)?.value)||0,included:Boolean(Number(document.querySelector(`[data-req="${CSS.escape(req.id)}"] [data-supplier="${i}"]`)?.value))}))}))}
   function enhanceResult(){if(!boq.length||!latest?.length)return;const rec=E.recommend(offerData(),boq),target=document.querySelector('.result-grid');if(!target)return;$('tenderReadiness')?.remove();target.insertAdjacentHTML('afterend',`<section class="readiness-card ${rec.decisionStatus}" id="tenderReadiness"><h4>${esc(rec.decisionLabel)}</h4><p>${rec.winner?`ההצעה המומלצת לפי ההתאמה לדרישה ולמחירי הייחוס: <b>${esc(rec.winner.supplier)}</b>. ציון התאמה ${rec.winner.requirementScore}.`:''}</p><div style="overflow:auto"><table class="match-table"><thead><tr><th>מציע</th><th>התאמה</th><th>עלות סעיפים</th><th>פער מייחוס</th><th>מצב</th></tr></thead><tbody>${rec.evaluated.map(x=>`<tr><td><b>${esc(x.supplier)}</b></td><td>${x.requirementScore}</td><td>${money(x.offeredTotal)}</td><td>${x.referenceDelta==null?'לא זמין':`${x.referenceDelta>0?'+':''}${x.referenceDelta}%`}</td><td><span class="status-chip ${x.readiness==='ready'?'good':'warn'}">${x.readiness==='ready'?'עומד בדרישות':x.readiness==='blocked'?'חסר תנאי סף':'דורש השלמה'}</span></td></tr>`).join('')}</tbody></table></div></section>`);injectEmails(rec)}
   function injectEmails(rec){$('emailDrafts')?.remove();const name=$('caseName').value.trim()||'תיק השוואה',missing=rec.winner?.items.filter(x=>!x.included||x.position.status==='unknown').map(x=>x.name).join(', ')||'אין';const requestMail=`נושא: בקשה להשלמת הצעה — ${name}\n\nשלום,\nלצורך השלמת בדיקת ההצעה נבקש לקבל פירוט או מחיר עבור: ${missing}.\nנא לציין לכל סעיף יצרן/דגם, כמות, מחיר יחידה, התקנה, מע״מ ואחריות.\n\nתודה.`;const summaryMail=`נושא: סיכום השוואת הצעות — ${name}\n\nשלום,\nהושלמה השוואת ההצעות מול דרישת המכרז וכתב הכמויות.\nההצעה המובילה כעת: ${rec.winner?.supplier||'טרם נקבעה'}.\nמצב ההחלטה: ${rec.decisionLabel}.\nהדוח המלא כולל מקורות, הנחות, פערים ומחירי ייחוס.\n\nבברכה.`;document.querySelector('.followup-zone').insertAdjacentHTML('afterend',`<section class="email-drafts" id="emailDrafts"><h4>מיילים מתוך תיק הלקוח</h4><p>בחרו טיוטה, ערכו אותה ואשרו במערכת הדואר לפני שליחה.</p><select id="mailType"><option value="request">בקשת השלמה למציע</option><option value="summary">סיכום ההשוואה ללקוח</option></select><textarea id="mailDraft"></textarea><div class="email-tools"><button class="secondary-action" id="saveMail" type="button">שמירת הטיוטה בתיק</button><button class="secondary-action" id="copyMail" type="button">העתקת המייל</button><button class="secondary-action" id="openMail" type="button">פתיחה בתוכנת הדואר</button><span class="outcome-status" id="mailStatus"></span></div></section>`);const drafts={request:requestMail,summary:summaryMail};$('mailDraft').value=requestMail;$('mailType').onchange=()=>{$('mailDraft').value=drafts[$('mailType').value]};$('saveMail').onclick=()=>{const all=JSON.parse(localStorage.getItem(MAIL_KEY)||'{}');all[name]={type:$('mailType').value,body:$('mailDraft').value,updatedAt:new Date().toISOString()};localStorage.setItem(MAIL_KEY,JSON.stringify(all));$('mailStatus').textContent='הטיוטה נשמרה בתיק המקומי.'};$('copyMail').onclick=async()=>{await navigator.clipboard.writeText($('mailDraft').value);$('mailStatus').textContent='המייל הועתק.'};$('openMail').onclick=()=>{const [subject,...body]=$('mailDraft').value.split('\n');location.href=`mailto:?subject=${encodeURIComponent(subject.replace(/^נושא:\s*/,''))}&body=${encodeURIComponent(body.join('\n').trim())}`}}
-  focusProduct();injectBuilder();injectMatrix();
+  function configureHeroActions(){
+    const actions=document.querySelector('.hero-actions');
+    if(!actions)return;
+    const compare=actions.querySelector('[data-start]');
+    const request=actions.querySelector('[data-demo]');
+    if(compare){
+      const button=compare.cloneNode(true);
+      button.textContent='השוואת הצעות שקיבלתי';
+      button.removeAttribute('data-start');
+      button.onclick=()=>{document.querySelector('[data-mode="received"]')?.click();showPanel(1)};
+      compare.replaceWith(button);
+    }
+    if(request){
+      const button=request.cloneNode(true);
+      button.textContent='יצירת בקשה להצעות';
+      button.removeAttribute('data-demo');
+      button.onclick=()=>{document.querySelector('[data-mode="request"]')?.click();showPanel(1);setTimeout(()=>$('tenderBuilder')?.scrollIntoView({behavior:'smooth',block:'start'}),50)};
+      request.replaceWith(button);
+    }
+  }
+  focusProduct();injectBuilder();injectMatrix();configureHeroActions();
   const originalShow=showPanel;showPanel=function(n){originalShow(n);if(Number(n)===3)setTimeout(renderMatrix,0)};
   const originalAnalyze=$('analyze').onclick;$('analyze').onclick=async()=>{saveRequest();await originalAnalyze();enhanceResult()};
   const originalOpen=openSavedCase;openSavedCase=function(id){originalOpen(id);loadRequest();setTimeout(()=>{renderMatrix();enhanceResult()},0)};
