@@ -105,7 +105,18 @@
   function bindCleanStart(){
     [$('newCase'),$('dashNewCase')].filter(Boolean).forEach(button=>button.addEventListener('click',()=>setTimeout(resetTenderDraft,0)));
   }
-  focusProduct();injectBuilder();injectMatrix();configureHeroActions();injectTenderUpload();configureTenderStages();observeExtraction();bindCleanStart();
+  function simplifyHome(){document.querySelector('.value-strip')?.remove()}
+  function addClientEmailAction(){
+    const actions=document.querySelector('.followup-buttons');if(!actions||$('clientEmailAction'))return;
+    actions.insertAdjacentHTML('beforeend','<button class="secondary-action" id="clientEmailAction" type="button">יצירת אימייל ללקוח</button>');
+    $('clientEmailAction').onclick=()=>{
+      if(!latest?.length){alert('יש להשלים את ההשוואה לפני יצירת המייל.');return}
+      const caseTitle=$('caseName')?.value.trim()||'השוואת ההצעות',winner=latest[0],decision=extractedTenderData?.decision,required=decision?.requiredBeforeDecision||[],risks=(latestReview?.risks||[]).map(x=>typeof x==='string'?x:x.text||x.risk).filter(Boolean),subject=`סיכום בדיקת הצעות - ${caseTitle}`;
+      const body=`שלום,\n\nהשלמנו בדיקה ראשונית של ההצעות בתיק "${caseTitle}".\n\nההצעה המובילה לפי הנתונים הקיימים: ${winner.name}.\nעלות מחושבת: ${money(winner.total)}.\nמצב הבדיקה: ${decision?.summary||latestReview?.bottomLine||'נדרש לעבור על הנתונים והמסמכים לפני החלטה סופית.'}\n${required.length?`\nלפני החלטה יש להשלים:\n${required.map((x,i)=>`${i+1}. ${x}`).join('\n')}\n`:''}${risks.length?`\nסיכונים ופערים מרכזיים:\n${risks.slice(0,4).map((x,i)=>`${i+1}. ${x}`).join('\n')}\n`:''}\nהדוח המלא כולל את ההשוואה, החוסרים והשאלות למציעים.\n\nבברכה.`;
+      $('emailDrafts')?.remove();document.querySelector('.followup-zone').insertAdjacentHTML('afterend',`<section class="email-drafts" id="emailDrafts"><h4>אימייל ללקוח</h4><p>הטיוטה נוצרה מתוך תיק ההחלטה. ניתן לערוך אותה לפני פתיחה בתוכנת הדואר.</p><textarea id="mailDraft"></textarea><div class="email-tools"><button class="secondary-action" id="saveMail" type="button">שמירת הטיוטה בתיק</button><button class="secondary-action" id="copyMail" type="button">העתקת המייל</button><button class="secondary-action" id="openMail" type="button">פתיחה בתוכנת הדואר</button><span class="outcome-status" id="mailStatus"></span></div></section>`);$('mailDraft').value=`נושא: ${subject}\n\n${body}`;$('saveMail').onclick=()=>{const all=JSON.parse(localStorage.getItem(MAIL_KEY)||'{}');all[caseTitle]={type:'client',body:$('mailDraft').value,updatedAt:new Date().toISOString()};localStorage.setItem(MAIL_KEY,JSON.stringify(all));$('mailStatus').textContent='הטיוטה נשמרה בתיק.'};$('copyMail').onclick=async()=>{await navigator.clipboard.writeText($('mailDraft').value);$('mailStatus').textContent='המייל הועתק.'};$('openMail').onclick=()=>{location.href=`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`};$('emailDrafts').scrollIntoView({behavior:'smooth',block:'nearest'})
+    };
+  }
+  focusProduct();simplifyHome();injectBuilder();injectMatrix();configureHeroActions();injectTenderUpload();configureTenderStages();observeExtraction();bindCleanStart();addClientEmailAction();
   const originalShow=showPanel;showPanel=function(n){originalShow(n);if(Number(n)===3)setTimeout(renderMatrix,0)};
   const originalAnalyze=$('analyze').onclick;$('analyze').onclick=async()=>{saveRequest();await originalAnalyze();enhanceResult()};
   const originalOpen=openSavedCase;openSavedCase=function(id){originalOpen(id);loadRequest();setTimeout(()=>{renderMatrix();enhanceResult()},0)};
