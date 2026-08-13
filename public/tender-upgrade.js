@@ -33,7 +33,38 @@
       request.replaceWith(button);
     }
   }
-  focusProduct();injectBuilder();injectMatrix();configureHeroActions();
+  function injectTenderUpload(){
+    const builder=$('tenderBuilder');
+    if(!builder||$('tenderSource'))return;
+    builder.querySelector('p').insertAdjacentHTML('afterend',`<div class="tender-source" id="tenderSource"><div><b>כבר יש לכם מסמך מכרז או כתב כמויות?</b><small>אפשר להעלות PDF, תמונה או קובץ טקסט ולהשלים ידנית רק את המידע החסר.</small></div><button type="button" class="file-pick" id="pickTender">העלאת מסמך המכרז</button><input id="tenderFile" type="file" hidden accept=".pdf,.txt,.csv,image/*"><span id="tenderFileStatus">טרם הועלה מסמך</span></div>`);
+    const input=$('tenderFile'),status=$('tenderFileStatus');
+    $('pickTender').onclick=()=>input.click();
+    input.onchange=()=>{
+      const file=input.files?.[0];
+      if(!file)return;
+      if(file.size>4000000){status.textContent='הקובץ גדול מ-4MB. יש לבחור קובץ קטן יותר.';status.className='error';input.value='';return}
+      status.textContent=`נבחר: ${file.name} · ${(file.size/1024).toFixed(0)}KB`;
+      status.className='success';
+      const key=$('caseName')?.value.trim()||'draft',all=JSON.parse(localStorage.getItem(REQ_KEY)||'{}');
+      all[key]={...(all[key]||{}),sourceDocument:{name:file.name,size:file.size,type:file.type||'application/octet-stream',selectedAt:new Date().toISOString()}};
+      localStorage.setItem(REQ_KEY,JSON.stringify(all));
+    };
+  }
+  function configureTenderStages(){
+    const builder=$('tenderBuilder'),toolbar=builder?.querySelector('.boq-toolbar'),list=$('boqList');
+    if(!builder||!toolbar||!list)return;
+    const setStage=stage=>{
+      mode=stage;
+      document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x.dataset.mode===stage));
+      builder.querySelector('h4').textContent=stage==='request'?'דרישת המכרז - נקודת הייחוס':'הדרישה המקורית מול ההצעות שהתקבלו';
+      toolbar.hidden=stage==='request';
+      list.hidden=stage==='request';
+      if(stage==='received')setTimeout(()=>toolbar.scrollIntoView({behavior:'smooth',block:'center'}),50);
+    };
+    document.querySelectorAll('[data-mode]').forEach(button=>button.onclick=()=>setStage(button.dataset.mode));
+    setStage('request');
+  }
+  focusProduct();injectBuilder();injectMatrix();configureHeroActions();injectTenderUpload();configureTenderStages();
   const originalShow=showPanel;showPanel=function(n){originalShow(n);if(Number(n)===3)setTimeout(renderMatrix,0)};
   const originalAnalyze=$('analyze').onclick;$('analyze').onclick=async()=>{saveRequest();await originalAnalyze();enhanceResult()};
   const originalOpen=openSavedCase;openSavedCase=function(id){originalOpen(id);loadRequest();setTimeout(()=>{renderMatrix();enhanceResult()},0)};
