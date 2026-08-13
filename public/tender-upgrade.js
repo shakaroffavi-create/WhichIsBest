@@ -59,6 +59,7 @@
       builder.querySelector('h4').textContent=stage==='request'?'דרישת המכרז - נקודת הייחוס':'הדרישה המקורית מול ההצעות שהתקבלו';
       toolbar.hidden=stage==='request';
       list.hidden=stage==='request';
+      [$('budget'),$('priority')].forEach(field=>{if(field?.closest('.field'))field.closest('.field').hidden=stage==='request'});
       if(stage==='received')setTimeout(()=>toolbar.scrollIntoView({behavior:'smooth',block:'center'}),50);
     };
     document.querySelectorAll('[data-mode]').forEach(button=>button.onclick=()=>setStage(button.dataset.mode));
