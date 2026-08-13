@@ -1,0 +1,5 @@
+const test=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');const vm=require('node:vm');const sandbox={};sandbox.globalThis=sandbox;vm.runInNewContext(fs.readFileSync(require.resolve('../public/tender-engine.js'),'utf8'),sandbox);const E=sandbox.WBTenderEngine;
+const req=[{id:'a',name:'ריצוף',quantity:100,referenceMin:80,referenceMax:100,required:true},{id:'b',name:'איטום',quantity:1,referenceMin:8000,referenceMax:10000,required:true}];
+test('prefers an eligible offer near reference prices',()=>{const r=E.recommend([{supplier:'א',lines:[{requirementId:'a',unitPrice:90},{requirementId:'b',unitPrice:9000}]},{supplier:'ב',lines:[{requirementId:'a',unitPrice:60},{requirementId:'b',unitPrice:12000}]}],req);assert.equal(r.winner.supplier,'א');assert.equal(r.decisionStatus,'ready')});
+test('blocks an offer missing a required line',()=>{const x=E.evaluateOffer({supplier:'א',lines:[{requirementId:'a',unitPrice:90}]},req);assert.equal(x.readiness,'blocked');assert.equal(x.missing,1)});
+test('flags suspiciously low prices',()=>{assert.equal(E.pricePosition(50,80,100).status,'low')});
