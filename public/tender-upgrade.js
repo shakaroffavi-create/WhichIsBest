@@ -22,7 +22,7 @@
       const button=compare.cloneNode(true);
       button.textContent='השוואת הצעות שקיבלתי';
       button.removeAttribute('data-start');
-      button.onclick=()=>{document.querySelector('[data-mode="received"]')?.click();showPanel(1)};
+      button.onclick=()=>{document.querySelector('[data-mode="received"]')?.click();showPanel(2)};
       compare.replaceWith(button);
     }
     if(request){
