@@ -110,8 +110,9 @@
   }
   function simplifyHome(){document.querySelector('.value-strip')?.remove()}
   function addClientEmailAction(){
-    const actions=document.querySelector('.followup-buttons');if(!actions||$('clientEmailAction'))return;
-    actions.insertAdjacentHTML('beforeend','<button class="secondary-action" id="clientEmailAction" type="button">יצירת אימייל ללקוח</button>');
+    const header=document.querySelector('.result-header');if(!header||$('clientEmailAction'))return;
+    header.insertAdjacentHTML('beforeend','<div class="result-quick-actions"><button class="secondary-action" id="clientEmailAction" type="button">יצירת אימייל ללקוח</button><button class="secondary-action" id="topPrintAction" type="button">הורדת דוח PDF</button></div>');
+    $('topPrintAction').onclick=()=>window.print();
     $('clientEmailAction').onclick=()=>{
       if(!latest?.length){alert('יש להשלים את ההשוואה לפני יצירת המייל.');return}
       const caseTitle=$('caseName')?.value.trim()||'השוואת ההצעות',winner=latest[0],decision=extractedTenderData?.decision,required=decision?.requiredBeforeDecision||[],risks=(latestReview?.risks||[]).map(x=>typeof x==='string'?x:x.text||x.risk).filter(Boolean),subject=`סיכום בדיקת הצעות - ${caseTitle}`;
