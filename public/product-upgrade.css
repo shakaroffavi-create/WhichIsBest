@@ -1,0 +1,12 @@
+.legal-links{display:flex;justify-content:center;gap:20px;margin-top:18px;font-size:14px}
+.legal-links a{color:#092f49;font-weight:800}
+.account-btn{border:1px solid #b8d5dd;background:#fff;color:#092f49;border-radius:9px;padding:9px 13px;font-weight:850}
+.wb-modal[hidden]{display:none}.wb-modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:18px;background:rgba(5,30,45,.62);backdrop-filter:blur(5px)}
+.wb-dialog{width:min(520px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:18px;border:1px solid #c7dce2;box-shadow:0 28px 80px rgba(0,0,0,.22);padding:26px;text-align:right}
+.wb-dialog h2{margin:0 0 8px;color:#092f49;font-size:27px}.wb-dialog>p{margin:0 0 18px;color:#365867}.wb-dialog label{display:grid;gap:6px;margin:12px 0;font-weight:800;font-size:14px}
+.wb-dialog input,.wb-dialog textarea,.wb-dialog select{width:100%;border:1px solid #b9d1d9;border-radius:9px;padding:11px;background:#fbfeff;font:inherit}.wb-dialog textarea{min-height:92px;resize:vertical}
+.wb-dialog-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}.wb-dialog-actions button{border-radius:9px;padding:11px 16px;font-weight:850}.wb-close{border:1px solid #c7dce2;background:#fff}.wb-submit{border:0;background:#092f49;color:#fff}
+.wb-consent{display:block!important;font-size:12px!important;font-weight:500!important;color:#365867}.wb-consent input{width:auto;margin-left:7px}.wb-consent a{color:#0b739d;font-weight:800}.wb-note{padding:10px 12px;border-radius:9px;background:#eef8fa;color:#285365;font-size:12px}.wb-error{min-height:20px;color:#b42318;font-size:12px;font-weight:800}
+.export-excel{border:1px solid #88bcc9!important;background:#effafb!important;color:#075b78!important}.offer-limit-note{margin-right:10px;color:#526f7e;font-size:12px}.add-option:disabled{opacity:.5;cursor:not-allowed}
+.feedback-stars{display:flex;gap:7px;direction:ltr;justify-content:flex-end}.feedback-stars button{width:42px;height:42px;border:1px solid #bdd3da;background:#fff;border-radius:9px;font-size:20px}.feedback-stars button.active{background:#fff2c7;border-color:#d8a52c}
+@media(max-width:560px){.wb-dialog{padding:20px}.wb-dialog-actions{display:grid}.account-btn{padding:8px 10px}.legal-links{flex-wrap:wrap}}
