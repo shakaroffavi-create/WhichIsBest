@@ -25,14 +25,21 @@
     const table=document.querySelector('#selectedMatrix table')||document.querySelector('.comparison table');if(!table){alert('יש להציג תחילה את מטריצת ההשוואה.');return}
     const rows=[...table.rows].map(row=>[...row.cells].map(cell=>cell.innerText.trim()));
     const csv=`sep=,\r\n${rows.map(row=>row.map(csvCell).join(',')).join('\r\n')}`;
-    const blob=new Blob(['\ufeff',csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`WICHISBEST-${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),500);localStorage.setItem('wib_meaningful_use','1');setTimeout(maybeFeedback,700);
+    const blob=new Blob(['\ufeff',csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`WICHISBEST-${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),500);localStorage.setItem('wib_meaningful_use','1');localStorage.setItem('wib_export_count',String(Number(localStorage.getItem('wib_export_count')||0)+1));setTimeout(maybeFeedback,700);
   }
   function installExport(){const actions=document.querySelector('.result-actions');if(!actions||$('exportExcel'))return;const button=document.createElement('button');button.id='exportExcel';button.type='button';button.className='secondary-action export-excel';button.textContent='ייצוא מטריצת ההשוואה ל־Excel';button.onclick=exportExcel;actions.insertBefore(button,actions.lastElementChild)}
   const feedbackModal=modalShell('feedbackModal',`<h2>איך הייתה ההשוואה?</h2><p>לאחר שימוש מלא במערכת, נשמח למשוב קצר שיעזור לנו להשתפר.</p><form id="feedbackForm"><label>עד כמה המערכת עזרה לך?</label><div class="feedback-stars" id="feedbackStars">${[1,2,3,4,5].map(n=>`<button type="button" data-rating="${n}" aria-label="דירוג ${n}">★</button>`).join('')}</div><input id="feedbackRating" type="hidden" required><label>מה דרש יותר מדי זמן?<select id="feedbackArea"><option value="">לא הייתה בעיה מיוחדת</option><option>העלאת מסמכים</option><option>אישור הנתונים</option><option>המטריצה</option><option>התרחישים</option><option>הדוח</option></select></label><label>מה הדבר האחד שהיית משפר?<textarea id="feedbackText" maxlength="600"></textarea></label><div class="wb-error" id="feedbackError"></div><div class="wb-dialog-actions"><button type="button" class="wb-close">אולי בפעם אחרת</button><button class="wb-submit">שליחת משוב</button></div></form>`);
   feedbackModal.querySelector('.wb-close').onclick=()=>{localStorage.setItem('wib_feedback_deferred',new Date().toISOString());closeModal(feedbackModal)};
   $('feedbackStars').onclick=e=>{const n=Number(e.target.dataset.rating);if(!n)return;$('feedbackRating').value=n;[...$('feedbackStars').children].forEach((b,i)=>b.classList.toggle('active',i<n))};
   $('feedbackForm').onsubmit=e=>{e.preventDefault();if(!$('feedbackRating').value){$('feedbackError').textContent='יש לבחור דירוג בין 1 ל־5.';return}const all=JSON.parse(localStorage.getItem(FEEDBACK_KEY)||'[]');all.push({rating:Number($('feedbackRating').value),area:$('feedbackArea').value,text:$('feedbackText').value.trim(),caseName:$('caseName')?.value.trim()||'',offers:document.querySelectorAll('#options .option-entry').length,createdAt:new Date().toISOString()});localStorage.setItem(FEEDBACK_KEY,JSON.stringify(all));localStorage.setItem('wib_feedback_completed','1');closeModal(feedbackModal)};
-  function maybeFeedback(){if(!localStorage.getItem('wib_meaningful_use')||localStorage.getItem('wib_feedback_completed'))return;openModal(feedbackModal)}
+  function maybeFeedback(){
+    if(!localStorage.getItem('wib_meaningful_use')||localStorage.getItem('wib_feedback_completed'))return;
+    const exports=Number(localStorage.getItem('wib_export_count')||0),nextExport=Number(localStorage.getItem('wib_feedback_next_export')||3),lastPrompt=Date.parse(localStorage.getItem('wib_feedback_last_prompt')||'')||0,month=30*24*60*60*1000;
+    if(exports<nextExport||Date.now()-lastPrompt<month)return;
+    localStorage.setItem('wib_feedback_last_prompt',new Date().toISOString());
+    localStorage.setItem('wib_feedback_next_export',String(exports+7));
+    openModal(feedbackModal);
+  }
   installAccountGate();installOfferLimit();installExport();
   const resultPanel=document.querySelector('[data-panel="4"]');if(resultPanel)new MutationObserver(installExport).observe(resultPanel,{childList:true,subtree:true});
 })();
